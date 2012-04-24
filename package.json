@@ -1,4 +1,10 @@
 {
   "name": "googlemaps",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "dependencies": {
+    "express": ">=2.2.0",
+    "jade":">1.0.0",
+    "less":">1.0.0",
+    "mongoose":">1.0.0"
+  }
 }
