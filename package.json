@@ -7,8 +7,8 @@
   },
   "dependencies": {
     "express": ">=2.2.0",
-    "jade":">=1.0.0",
-    "less":">=1.0.0",
-    "mongoose":">=1.0.0"
+    "jade":">=0.0.1",
+    "less":">=0.0.1",
+    "mongoose":">=0.0.1"
   }
 }
