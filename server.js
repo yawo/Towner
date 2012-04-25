@@ -20,6 +20,7 @@ var MONGO_URL = "mongodb://root:root@ds033047.mongolab.com:33047/product";
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', viewEngine);
+  app.set('view options', {layout:true});
   app.use(express.bodyParser());
   app.use(express.methodOverride());  
   app.use(express.cookieParser('keyboard cat'));
