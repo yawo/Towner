@@ -1,8 +1,14 @@
-p Bienvenu(e) .   
-#map_canvas    
-center
-  p.result.ui-widget.ui-widget-content(float='right') 
-  br
-  p.product-result.ui-widget.ui-widget-content.ui-corner.ui-corner-all Results:
-script
-  window.onload = initialize
+extends layout
+
+block content
+    p Bienvenu(e) .   
+    #map_canvas    
+    .user-actions  
+      p.result.ui-widget.ui-widget-content(float='right') 
+      br
+      br
+      br
+      p.product-result.ui-widget.ui-widget-content.ui-corner.ui-corner-all 
+    script
+      window.onload = initialize;
+  

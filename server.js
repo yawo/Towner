@@ -13,14 +13,14 @@
 var express = require('express');
 //var app = module.exports = express.createServer();
 var app = express.createServer();
-var viewEngine = 'jade'; // modify for your view engine
+
 
 var MONGO_URL = "mongodb://root:root@ds033047.mongolab.com:33047/product";
 // Configuration
 app.configure(function(){
   app.set('views', __dirname + '/views');
-  app.set('view engine', viewEngine);
-  app.set('view options', {layout:true});
+  app.set('view engine', 'jade');
+  app.set('view options', {layout:false});
   app.use(express.bodyParser());
   app.use(express.methodOverride());  
   app.use(express.cookieParser('keyboard cat'));
@@ -54,7 +54,7 @@ app.post('/storelocation', function(req, res){
             console.log("findProductNear (loc,docs): ",req.session.location,docs.length,"Items");
             locProducts = docs;
         }
-        res.json({products:locProducts});
+        res.partial('partials/product',locProducts);
     });   
 });
 

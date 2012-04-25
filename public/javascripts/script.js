@@ -92,9 +92,9 @@ function initialize() {
  function fetchProducts(loc){
      var url = '/storelocation';
      $.post( url,{location:loc} , function(data, textStatus, jqXHR){
-         console.log("Data",data.products,textStatus,jqXHR);
-         $(".product-result").html(data.products);
-     },'json' );
+         console.log("Data",data,textStatus,jqXHR);
+         $(".product-result").html(data);
+     } );
  }
 
 
