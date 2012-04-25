@@ -1,5 +1,5 @@
 var map,marker,geocoder;
-
+var productIndex=0;
 function initialize() {
       var myOptions = {
           //center: new google.maps.LatLng(-34.397, 150.644),
@@ -26,6 +26,15 @@ function initialize() {
       
       google.maps.event.addListener(map, 'click', function(event) {
         placeMarker(event.latLng);
+      });
+      
+       google.maps.event.addListener(map, 'dblclick', function(event) {
+          var ptitle = prompt("Please give product title:","Prod"+productIndex++);
+          var loc = [Math.round(event.latLng.lng()*1000)/1000,Math.round(event.latLng.lat()*1000)/1000];
+          //[event.latLng.lat()*1000,event.latLng.lng()]
+           $.post( 'newproduct',{title:ptitle,location:loc} , function(data, textStatus, jqXHR){
+            console.log("newproduct",data,textStatus,jqXHR);         
+        } );
       });
       
       google.maps.event.addListener(map, 'center_changed', function() {
@@ -80,9 +89,9 @@ function initialize() {
         if (results[1]) {
           //map.setZoom(6)
           //$(".result").html("Your click position is (Lat/Long) : <b>"+location.lat()+" / "+location.lng()+".</b> ("+results[1].formatted_address+")");
-          $(".result").html("Near »: <b>"+results[1].formatted_address+".</b> ("
-                  +Math.round(location.lat()*1000)/1000+" / "+Math.round(location.lng()*1000)/1000+")");
-          fetchProducts([location.lat(),location.lng()]);
+          $(".result").html("Near Lng/Lat »: <b>"+results[1].formatted_address+".</b> ("
+                  +Math.round(location.lng()*1000)/1000+" / "+Math.round(location.lat()*1000)/1000+")");
+          fetchProducts([location.lng(),location.lat()]);
         }
       } else {
         alert("Geocoder failed due to: " + status);

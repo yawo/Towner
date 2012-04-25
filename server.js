@@ -42,6 +42,20 @@ app.get('/', function(req, res){
     //res.send("Hello");
 });
 
+app.post('/newproduct', function(req, res){
+  var newp = new Product({title:req.body.title,location:req.body.location});
+  newp.save(function(err){
+          if(err){
+            console.log(newp.title,"Error saving:",err);
+            res.json({status:'failure'});
+          } else{
+              res.json({status:'success'});
+          }
+      });
+  
+});
+
+
 app.post('/storelocation', function(req, res){
   // Perhaps we posted several items with a form
   // (use the bodyParser() middleware for this)  
@@ -113,13 +127,13 @@ var products = [];
   , owner       : 'PlaizGo'
   , location    : [10,150]});
   
-  products.forEach(function(prod){
+  /*products.forEach(function(prod){
       prod.save(function(err){
           if(err){
             console.log(prod.title,"Error saving:",err);
           } 
       });
-  });  
+  });  */
   console.timeEnd("MongoDb init");
   
  

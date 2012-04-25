@@ -1,8 +1,23 @@
+ @base: #f938ab;
+
+.box-shadow(@style, @c) when (iscolor(@c)) {
+  box-shadow:         @style @c;
+  -webkit-box-shadow: @style @c;
+  -moz-box-shadow:    @style @c;
+}
+.box-shadow(@style, @alpha: 50%) when (isnumber(@alpha)) {
+  .box-shadow(@style, rgba(0, 0, 0, @alpha));
+}
+.box { 
+  
+   .box-shadow(0 0 5px, 30%) 
+}
+
  html { height: 100% }
  body { font-size:12px;height: 100%; margin: 0; padding: 0 ;margin-right:auto;margin-left:20px;font-family: 'Cantarell', verdana,serif;}
  #map_canvas { height: 50% ;width:50%;border:1px solid #444444 ;min-height:300px}
  .result {margin-bottom:20px;float:left;border:2px solid #f2f4f7; margin-left:auto;margin-right:auto}
  .footer {margin:100px;padding:10px;font-size:10px;background-color:#f2f4f7}
  .product-detail{
-     margin:2px; background-color:#dbe9ff;text-align:left; width:200px;
+     margin-bottom:5px;text-align:left; width:300px;padding:3px;    
  }
