@@ -11,7 +11,8 @@
 //   views/
 //
 var express = require('express');
-var app = module.exports = express.createServer();
+//var app = module.exports = express.createServer();
+var app = express.createServer();
 var viewEngine = 'jade'; // modify for your view engine
 
 var MONGO_URL = "mongodb://root:root@ds033047.mongolab.com:33047/product";
