@@ -64,7 +64,7 @@ function initialize() {
 
   function handleNoGeolocation(errorFlag) {
         if (errorFlag) {
-          var content = 'Error: The Geolocation service failed.';
+          var content = 'The Geolocation service failed. Please browse map to your position';
         } else {
           var content = 'Error: Your browser doesn\'t support geolocation.';
         }
