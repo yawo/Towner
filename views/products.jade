@@ -1,0 +1,6 @@
+- each product in products
+  .product-detail.box(id=product.id)
+       b #{product.title} 
+       | (location : #{product.location})
+       i.ui-icon-closethick(onclick="productRemove(#{product.id})")
+

@@ -1,0 +1,40 @@
+#dialog-form(title='Create new product')
+      h4.ui-corner-all Please fill the product informations.
+      form(method="post", action="saveproduct",id="newproductform")
+        table
+          - each field in productFields
+            - fname = field[0]
+            - ftype = field[1]
+            - fvalue = field[2]
+            tr
+               td
+                 label(for=fname)= fname
+               td
+                 if ftype == "select"                      
+                   select.select.required.ui-widget-content.ui-corner-all(name=fname,id=fname)
+                     each opt in field[3]
+                       - isSelected = (opt==field[2])
+                       option(value=opt,selected=isSelected)= opt
+                 else if ftype == "textarea"
+                    textarea.textarea.ui-widget-content.ui-corner-all(name=fname,cols="35",rows="5",id=fname)                
+                 else if ftype == "date"
+                    input.text.dlt-datepicker.date.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue)                     
+                 else if ftype == "number"
+                    input.text.required.number.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue)                     
+                 else if ftype == "checkbox"
+                    input.text.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue,checked=(fvalue?'checked':''))                     
+                 else if ftype == "url"
+                    input.url.text.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue,placeholder='Copy url here'))                     
+                 else
+                    input.text.required.ui-widget-content.ui-corner-all(type=ftype, name=fname,id=fname,value=fvalue)
+        input(id="locationLng",name="locationLng",type="hidden")         
+        input(id="locationLat",name="locationLat",type="hidden")
+        input(id="locationStr",name="locationStr",type="hidden")
+        input(id="_id",name="_id",type="hidden")
+        hr
+        center
+            #new-product-submit Submit
+            |    
+            #new-product-cancel Reset
+            br
+            #new-product-result
