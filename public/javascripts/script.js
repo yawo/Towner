@@ -71,7 +71,7 @@ function initialize() {
     
         var options = {
           map: map,
-          position: new google.maps.LatLng(60, 105),
+          position: new google.maps.LatLng(-4.5, 15.5),
           content: content
         };
     
