@@ -1,18 +1,45 @@
 extends layout
 
-block content
-    p Welcome .
-    p  The map will locate near product.
-      small 
-        b  Double-click on the map to create a product there.
-    #map_canvas    
-    .user-actions  
-      p.result.ui-widget.ui-widget-content(float='right') 
-      br
-      br
-      br
-      p.product-result.ui-widget.ui-widget-content.ui-corner.ui-corner-all 
+block content 
+  table#towner-main    
+    tr
+      td
+        #actions.blockheader.ui-corner-top
+          center
+            span.action  Click: 
+            small: i Find a products near current position.
+            span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
+            small: i Create a product at current position.
+        #map-filters.blockheader.ui-corner-top
+          small 
+            b  Find :  
+            select.select.special-form.ui-widget.ui-corner-all(name='category-filter',id='category-filter',value=productFields[0][2])
+              each opt in productFields[0][3]
+                 - isSelected = (opt==productFields[0][2])
+                 option(value=opt,selected=isSelected)= opt
+            b &nbsp; related to :  
+            input.input.special-form.ui-widget.ui-corner-all(name='content-filter',id='content-filter',placeholder='type some keywords',size="50")        
+            |  &nbsp;&nbsp;
+            span#submit-filter(title='Search near current position',onclick='fetchProducts()') &nbsp; 
+        #map_canvas              
+        .result.blockheader.ui-corner-bottom 
+      td.ui-corner-bottom
+        #results-header.blockheader.ui-corner-top
+          center
+            span.action  Click: 
+            small: i Show product details.
+            span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
+            small: i Edit the product.
+        p.product-result 
+    
+  .ui-helper-hidden
+    include includes/saveproduct
+  script
+      window.onload = initialize 
+      $(function() {
+            newProductInit();  
+            $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
+            $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
+      });
 
-    script
-      window.onload = initialize;
   

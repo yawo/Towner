@@ -1,21 +1,28 @@
 !!! 5
 html
-head
-    meta(name='viewport', content='initial-scale=1.0, user-scalable=no')    
-    script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
-    script(type='text/javascript', src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js')
-    // script(type='text/javascript', src='https://www.google.com/jsapi');
-    script(type='text/javascript', src='http://maps.googleapis.com/maps/api/js?key=AIzaSyCgW7lk0fz_YE5gZj_loz24rrnEECXSHqE&sensor=false')            
-    script(type='text/javascript', src='/javascripts/script.js')
+  head
+    meta(name='viewport', content='initial-scale=1.0, user-scalable=no')     
+    link(rel='stylesheet', href='/stylesheets/jquery-ui.css', type='text/css')
     link(rel='stylesheet/less', type='text/css', href='/stylesheets/style.less')
     script(type='text/javascript', src='/javascripts/less.js')
-     
+    script(type='text/javascript', src='/javascripts/jquery.js')   
+    script(type='text/javascript', src='http://maps.googleapis.com/maps/api/js?key=AIzaSyCgW7lk0fz_YE5gZj_loz24rrnEECXSHqE&sensor=false')            
+    script(type='text/javascript', src='/javascripts/script.js')     
   body
     header 
-      h2 Google Maps Product Localiser. 
-      
-     br
-    .content
-       block content
-    p.footer &copy; Guillaume Kpotufe, Helio labs,2012.
+      .invite Towner
+      small.motto: i &nbsp; Simplifying our Lifes ...
+    br
+    block content
+    center
+      .footer &copy; Guillaume Kpotufe , 
+        b Towner labs 
+        | (townerlabs@gmail.com), 2012.
+    script(type='text/javascript', src='/javascripts/jquery.ui.js')    
+    script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    
+    script(type='text/javascript', src='/javascripts/jquery.colorbox.js')    
+    script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js')
+    script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/additional-methods.min.js')
+    //script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/localization/messages_fr.js')     
+    link(rel='stylesheet', href='/stylesheets/colorbox.css', type='text/css')
     
