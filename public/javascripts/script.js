@@ -4,8 +4,8 @@ var allProducts = [];
 var newProductvalidator;
 function initialize() {
       var myOptions = {
-          //center: new google.maps.LatLng(-34.397, 150.644),
-          center: new google.maps.LatLng(-4.5, 15.5),      
+          center: new google.maps.LatLng(-34.397, 150.644),
+          //center: new google.maps.LatLng(-4.5, 15.5),      
           zoom: 6,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
@@ -64,19 +64,20 @@ function initialize() {
 
   function handleNoGeolocation(errorFlag) {
         if (errorFlag) {
-          var content = 'The Geolocation service failed. Please browse map to your position';
+          var content = 'Geolocation service failed. Please browse map to your position';
         } else {
           var content = 'Error: Your browser doesn\'t support geolocation.';
         }
     
         var options = {
           map: map,
-          position: new google.maps.LatLng(-4.5, 15.5),
+          position: new google.maps.LatLng(-34.397, 150.644),
           content: content
         };
     
         var infowindow = new google.maps.InfoWindow(options);
         map.setCenter(options.position);
+        map.setZoom(3);
 
   }
 
