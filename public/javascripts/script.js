@@ -191,6 +191,7 @@ function initialize() {
  }
  
  function createProductAt(loc){
+    var loc = loc || map.getPosition();
     $("#newproductform #locationLng").val(loc.lng());
     $("#newproductform #locationLat").val(loc.lat());          
     geocoder.geocode({'latLng': loc}, function(results, status) {

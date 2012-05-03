@@ -114,6 +114,11 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 
+app.get('/login', function(req, res){  
+  req.session.destroy();  
+  res.render('login');
+});
+
 app.get('/auth/google', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {

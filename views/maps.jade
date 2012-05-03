@@ -7,9 +7,10 @@ block content
         #actions.blockheader.ui-corner-top
           center
             span.action  Click: 
-            small: i Find a products near current position.
+            small: i Find an element near current position.
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
-            small: i Create a product at current position.
+            small: i Create an element at current position.
+            span#quick-create-product(title='Create near current position',onclick='createProductAt()') 
         #map-filters.blockheader.ui-corner-top
           small 
             b  Find :  
@@ -27,9 +28,9 @@ block content
         #results-header.blockheader.ui-corner-top
           center
             span.action  Click: 
-            small: i Show product details.
+            small: i Show element details.
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
-            small: i Edit the product.
+            small: i Edit the element.
         p.product-result 
     
   .ui-helper-hidden
@@ -40,6 +41,7 @@ block content
             newProductInit();  
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
+            $( "#quick-create-product" ).button({text: false,icons: {primary: "ui-icon-plus"}});            
       });
 
   
