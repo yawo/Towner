@@ -1,30 +1,56 @@
-// *******************************************************
-// expressjs template
-//
-// assumes: npm install express
-// defaults to jade engine, install others as needed
-//
-// assumes these subfolders:
-//   public/
-//   public/javascripts/
-//   public/stylesheets/
-//   views/
-//
+
+//Auth Keys
+var FACEBOOK_APP_ID     = '281707958585235'; 
+var FACEBOOK_APP_SECRET = 'd0fd783c08659809fa3fe6da7647de0c';
+
+var TWITTER_APP_ID      = 'cJrWnw1NgQ8PJb7J0QbRw'; 
+var TWITTERK_APP_SECRET = '8FvfzmM31qIvKrUR1fhrtNRHFcK0w4IGOEImqWI';
+//access token :  301400761-QFta92FPdGmKCsrZLPKRVNZ0uTNQUrZDnxnkAM0
+//access token secret:  r5ExRRRBax1MRjVB50V5ciSOAf1fZGBvMxfFZuck3Y
+
+//Authentication. (Passport)
+var passport = require('passport')
+  , util = require('util')  
+  , GoogleStrategy = require('passport-google').Strategy
+  , FacebookStrategy = require('passport-facebook').Strategy
+  , TwitterStrategy = require('passport-twitter').Strategy;
+  
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+
+
 var express = require('express');
 //var app = module.exports = express.createServer();
-var app = express.createServer();
-
+var app     = express.createServer();
+var appPort = (process.env.PORT || process.env['app_port'] || 3000); 
+var redisPort   = 9002,redisHost ='panga.redistogo.com', redisPass ='5f5a23fad61370502faadb5bcb860bfa';
+var sessionSecret = 'keyboard cat';
 
 var MONGO_URL = "mongodb://root:root@ds033047.mongolab.com:33047/product";
+var RedisStore = require('connect-redis')(express);
 // Configuration
 app.configure(function(){
+  app.set('delait_protocol','http');
+  app.set('dealit_host','yawotests.herokuapp.com');
+  app.set('dealit_port',appPort);
+  app.set('redis_port',redisPort);
+  app.set('redis_host',redisHost);
+  app.set('redis_auth',redisPass); 
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('view options', {layout:false});
   app.use(express.bodyParser());
   app.use(express.methodOverride());  
-  app.use(express.cookieParser('keyboard cat'));
-  app.use(express.session({ secret: "keyboard cat" }));
+  app.use(express.cookieParser(sessionSecret));
+  app.use(express.session({ store: new RedisStore({host:redisHost, port:redisPort,pass:redisPass}), secret: sessionSecret }));
+  //app.use(express.session({ secret: "keyboard cat" }));
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
   
@@ -35,7 +61,95 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler());
 });
+/************* REDIS ***************/
+var redis = require("redis");
+var client = redis.createClient(app.settings.redis_port,app.settings.redis_host);
+client.auth(app.settings.redis_auth,redis.print);
+client.on("error", function (err) {
+    console.log("Error connecting to Redis (check auth) " + err);  
+});
+
+/***********  Auth Strategies **********************/
+passport.use(new GoogleStrategy({
+    returnURL: app.settings.delait_protocol+'://'+app.settings.dealit_host+':'+app.settings.dealit_port+'/auth/google/callback',
+    realm: app.settings.delait_protocol+'://'+app.settings.dealit_host+':'+app.settings.dealit_port+'/'
+  },
+   function(identifier, profile, done) {  
+    process.nextTick(function () {      
+      profile.identifier = identifier;
+      console.log("Google profile :",profile);
+      return done(null, profile);
+    });
+  }
+));
+
+
+passport.use(new FacebookStrategy({
+    clientID: app.settings.env,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: app.settings.delait_protocol+'://'+app.settings.dealit_host+':'+app.settings.dealit_port+'/auth/facebook/callback'
+  },
+  function(accessToken, refreshToken, profile, done) {   
+    console.log("Facebook profile :",profile); 
+    return done(null, profile);    
+  }
+));
+
+passport.use(new TwitterStrategy({
+    consumerKey: TWITTER_APP_ID,
+    consumerSecret: TWITTERK_APP_SECRET,
+    callbackURL: app.settings.delait_protocol+'://'+app.settings.dealit_host+':'+app.settings.dealit_port+'/auth/twitter/callback'
+  },
+  function(token, tokenSecret, profile, done) {
+    console.log("Twitter profile :",profile); 
+    return done(null, profile);       
+  }
+));
+
+
 /************* Routes *****************************************/
+app.get('/logout', function(req, res){
+  req.logout();
+  req.session.destroy();
+  res.redirect('/');
+});
+
+app.get('/auth/google', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+  
+  app.get('/auth/facebook', 
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/auth/facebook/callback', 
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/auth/twitter', 
+  passport.authenticate('twitter', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/auth/twitter/callback', 
+  passport.authenticate('twitter', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
 
 app.get('/', function(req, res){ 
     res.render('maps',{productFields:[['category','select','Hospital',['Pharmacy','Hospital','Hotel','SuperMarket','Train-Airport','Religious','Club','Ministry','Company','Restaurant','Cinema','School-Faculty']]
@@ -45,7 +159,7 @@ app.get('/', function(req, res){
     //res.send("Hello");
 });
 
-app.post('/saveproduct', function(req, res){    
+app.post('/saveproduct',ensureAuthenticated, function(req, res){    
     var data =  {title:req.body.title
           ,category:req.body.category
           ,price:req.body.price
@@ -93,7 +207,7 @@ app.post('/saveproduct', function(req, res){
     }
 });
 
-app.post('/deleteproduct', function(req, res){
+app.post('/deleteproduct',ensureAuthenticated, function(req, res){
   Product.remove({_id:req.body._id},function(err){
           if(err){
             console.log(req.body._id,"Error deleting:",err);
@@ -210,9 +324,6 @@ var products = [];
   
  
 
-/*** Launch the server on env port or use 3000 by default ****/
-app.listen(process.env.PORT || process.env['app_port'] || 3000);
-
 function findProductNear(loc){
       var data =  ['title'
           ,'category'
@@ -228,6 +339,7 @@ function findProductNear(loc){
           ,'locationSt'];
     var docs={};
     Product.find({},data).where('location').near(loc).exec(getRes);    
+    
     function getRes(err, res){
         if(err){
              console.log("findProductNear Error:",err);
@@ -240,3 +352,12 @@ function findProductNear(loc){
     
     return docs;
 }
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
+
+
+/*** Launch the server on env port or use 3000 by default ****/
+app.listen(appPort);

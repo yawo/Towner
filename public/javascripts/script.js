@@ -2,11 +2,14 @@ var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
+var zoom=4;
+//This is the compilation of partials/product.jade template
+var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b><br/><div id="product-details-description"></div></div>';
 function initialize() {
       var myOptions = {
           center: new google.maps.LatLng(-34.397, 150.644),
           //center: new google.maps.LatLng(-4.5, 15.5),      
-          zoom: 6,
+          zoom: zoom,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
       
@@ -22,8 +25,8 @@ function initialize() {
       geocoder = new google.maps.Geocoder();
     
       google.maps.event.addListener(marker, 'click', function() {
-        map.setZoom(6);
-        map.setCenter(marker.getPosition());
+        //map.setZoom(zoom);
+        //map.setCenter(marker.getPosition());
       });
       
       google.maps.event.addListener(map, 'click', function(event) {
@@ -35,7 +38,7 @@ function initialize() {
           //var loc = [Math.round(event.latLng.lng()*1000)/1000,Math.round(event.latLng.lat()*1000)/1000];
           //[event.latLng.lat()*1000,event.latLng.lng()]
           createProductAt(event.latLng);         
-           map.setZoom(6);
+           //map.setZoom(zoom);
       });
       
       google.maps.event.addListener(map, 'center_changed', function() {
@@ -77,7 +80,7 @@ function initialize() {
     
         var infowindow = new google.maps.InfoWindow(options);
         map.setCenter(options.position);
-        map.setZoom(3);
+        map.setZoom(zoom);
 
   }
 
@@ -89,7 +92,7 @@ function initialize() {
   geocoder.geocode({'latLng': location}, function(results, status) {
       if (status == google.maps.GeocoderStatus.OK) {
         if (results[1]) { 
-          //map.setZoom(6)
+          //map.setZoom(zoom)
           //$(".result").html("Your click position is (Lat/Long) : <b>"+location.lat()+" / "+location.lng()+".</b> ("+results[1].formatted_address+")");
           $(".result").html("Near Lng/Lat »: <b>"+results[1].formatted_address+".</b> ("
                   +Math.round(location.lng()*1000)/1000+" / "+Math.round(location.lat()*1000)/1000+")");
@@ -150,12 +153,13 @@ function initialize() {
  }
  
  function productDetails(i){         
-    $("#"+allProducts[i]._id).addClass('ui-state-hover');   
-    var content = "<div class='product-details ui-corner-all'>";
-    content+=allProducts[i].title+"<br/>"+allProducts[i].description;
-    content+="</div>";
-    console.log(content);
-    $('#towner-main').append(content);    
+    $("#"+allProducts[i]._id).addClass('ui-state-hover');       
+    $('#towner-main').append(productDetailsTemplate);  
+    //Fill values
+    for(var field in allProducts[i]){
+        $("#product-details-"+field).val(allProducts[i][field] || 'n/a');           
+    }
+    
  }
  
  
