@@ -32,7 +32,7 @@ passport.deserializeUser(function(obj, done) {
 
 
 
-var express = require('express', http = require('http');
+var express = require('express'), http = require('http');
 //var app = module.exports = express.createServer();
 var app     = express.createServer();
 var appPort = (process.env.PORT || process.env['app_port'] || 3000); 
@@ -71,11 +71,42 @@ app.configure('production', function(){
 
 /************* FLICKR for storing photos **************/
 
-var FlickrAPI= require('flickr').FlickrAPI;
-var sys= require('sys'); 
+var FlickrAPI= require('./flickrnode/lib/flickr').FlickrAPI;
+var sys= require('util'); 
 var flickr= new FlickrAPI(FLICKR_KEY, FLICKR_SECRET);
-flickr.setAuthenticationToken(flickr_oauth.auth.access_token.oauth_token);
-console.log("flick infos",flickr.people.getInfo());
+var flickrFrob;
+var flickrAuthToken
+flickr.getLoginUrl("write", null, function(error, url, frob) {
+    console.log("Visit",url);
+    console.log("frob",frob);
+    flickrFrob=frob;    
+});
+
+app.get('/auth/flickr/callback', function(req,res){
+  console.log("frob",req.query.frob);  
+  flickr.auth.getToken(req.query.frob, function(error, res){
+      console.log("flickrFrob",flickrFrob);
+      console.log("Res",res);
+      flickrAuthToken = res.token;
+      flickr.setAuthenticationToken(flickrAuthToken);
+    });
+    
+    flickr.people.getInfo(function(res){
+        console.log("flick infos",res);
+    });
+    
+    res.send("Ok. Goto <a href='/'>Home</a>");
+});
+
+
+
+//console.log("flickFrob",flickrFrob);
+//console.log("flickAuthToken",flickrFrob);
+
+/*flickr.setAuthenticationToken(flickr_oauth.auth.access_token.oauth_token);
+flickr.people.getInfo(function(res){
+    console.log("flick infos",res);
+    });*/
 //Check here: https://github.com/ciaranj/flickrnode/blob/master/lib/request.js. Build your own uploader then :) You should use Oauth ? Yes Make a new signature.
 //http://www.flickr.com/services/api/explore/flickr.auth.oauth.getAccessToken
 //http://www.flickr.com/services/api/auth.oauth.html
@@ -182,6 +213,7 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {    
     req.session.user = {username:req.user.displayName,id:req.user.emails[0].value,profile:req.user.identifier, type:'google'};
+    req.session.isAuthenticated=true;
     res.redirect('/');
   });
   
@@ -195,6 +227,7 @@ app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
     req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.profileUrl, type:'facebook'};
+    req.session.isAuthenticated=true;
     res.redirect('/');
   });
 
@@ -208,15 +241,17 @@ app.get('/auth/twitter/callback',
   passport.authenticate('twitter', { failureRedirect: '/login' }),
   function(req, res) {
     req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.id, type:'twitter'};
+    req.session.isAuthenticated=true;
     res.redirect('/');
   });
 
 app.get('/', function(req, res){     
-    var userName = req.session.user.userName || 'Guest';
+    
+    var userName = (req.session.user)?req.session.user.userName:'Guest';
     res.render('maps',{productFields:[['category','select','Hospital',['Pharmacy','Hospital','Hotel','SuperMarket','Train-Airport','Religious','Club','Ministry','Company','Restaurant','Cinema','School-Faculty']]
                         ,['title','text'],['price','number',0],['isAvailable','checkbox',true]
                         ,['owner','text'],['description','textarea'],['offlineDate','date'],['picture','url']]
-                    , userName:userName});
+                    , userName:userName, isAuthenticated:req.session.isAuthenticated});
     //res.send("Hello");
 });
 
