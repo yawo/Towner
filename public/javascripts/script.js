@@ -2,9 +2,13 @@ var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
-var zoom=4;
 //This is the compilation of partials/product.jade template
 var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b><br/><div id="product-details-description"></div></div>';
+var zoom=4;
+var isAuthenticated=false;
+function setAuthenticated(auth){
+    isAuthenticated=auth;    
+}
 function initialize() {
       var myOptions = {
           center: new google.maps.LatLng(-34.397, 150.644),

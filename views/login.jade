@@ -1,0 +1,8 @@
+extends layout
+
+block content 
+  #login-main
+     p.login-invite Connect using :
+     each provider in ['google', 'facebook','twitter']
+       a.login-google(href='/auth/'+provider)
+         img(src='http://github.com/intridea/authbuttons/raw/master/png/'+provider+'_64.png')

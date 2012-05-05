@@ -10,8 +10,20 @@ html
     script(type='text/javascript', src='/javascripts/script.js')     
   body
     header 
-      .invite Towner
-      small.motto: i &nbsp; Simplifying our Lifes ...
+      table
+        tr
+          td.header-left
+            .invite Towner
+            small.motto: i &nbsp; Simplifying our Lifes ...
+          td.header-right
+            #header-username= userName
+            if isAuthenticated
+              - setAuthenticated(isAuthenticated)
+              #logout-button
+                a(href='/login') Login
+            else
+              #login-button
+                a(href='/login') Login
     br
     block content
     center

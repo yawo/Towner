@@ -1,5 +1,11 @@
 
 //Auth Keys
+
+var FLICKR_KEY          = '15a7e0491bf5b3fc921ce7ccea8d7727';
+var FLICKR_SECRET       = '452b077e4c78db39';
+var flickr_oauth        = { "auth": { 
+    "access_token": { "oauth_token": "72157629598753248-b6304d99674e8b27", "oauth_token_secret": "717ac384bfeac0f0" } }, "stat": "ok" };
+
 var FACEBOOK_APP_ID     = '281707958585235'; 
 var FACEBOOK_APP_SECRET = 'd0fd783c08659809fa3fe6da7647de0c';
 
@@ -26,14 +32,15 @@ passport.deserializeUser(function(obj, done) {
 
 
 
-var express = require('express');
+var express = require('express', http = require('http');
 //var app = module.exports = express.createServer();
 var app     = express.createServer();
 var appPort = (process.env.PORT || process.env['app_port'] || 3000); 
 var redisPort   = 9002,redisHost ='panga.redistogo.com', redisPass ='5f5a23fad61370502faadb5bcb860bfa';
 var sessionSecret = 'keyboard cat';
 
-var MONGO_URL = "mongodb://root:root@ds033047.mongolab.com:33047/product";
+var MONGO_URL       = "mongodb://root:root@ds033047.mongolab.com:33047/product";
+var MONGO_USERS_URL = "mongodb://townerlabs:mohafada@dbh75.mongolab.com:27757/users";
 var RedisStore = require('connect-redis')(express);
 // Configuration
 app.configure(function(){
@@ -61,12 +68,58 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler());
 });
+
+/************* FLICKR for storing photos **************/
+
+var FlickrAPI= require('flickr').FlickrAPI;
+var sys= require('sys'); 
+var flickr= new FlickrAPI(FLICKR_KEY, FLICKR_SECRET);
+flickr.setAuthenticationToken(flickr_oauth.auth.access_token.oauth_token);
+console.log("flick infos",flickr.people.getInfo());
+//Check here: https://github.com/ciaranj/flickrnode/blob/master/lib/request.js. Build your own uploader then :) You should use Oauth ? Yes Make a new signature.
+//http://www.flickr.com/services/api/explore/flickr.auth.oauth.getAccessToken
+//http://www.flickr.com/services/api/auth.oauth.html
+//Here is engineering
+
+function sendPhoto(photo){
+  // An object of options to indicate where to post to
+  var post_options = {
+      host: 'http://api.flickr.com/services/upload/',
+      port: '80',
+      path: '/compile',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': photo.length
+      }
+  };
+
+  // Set up the request
+  var post_req = http.request(post_options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+          console.log('Response: ' + chunk);
+      });
+  });
+
+  // post the data
+  post_req.write(photo);
+  post_req.end();
+
+}
+
 /************* REDIS ***************/
 var redis = require("redis");
 var client = redis.createClient(app.settings.redis_port,app.settings.redis_host);
 client.auth(app.settings.redis_auth,redis.print);
 client.on("error", function (err) {
     console.log("Error connecting to Redis (check auth) " + err);  
+});
+
+var statsClient=redis.createClient(9136,'panga.redistogo.com');
+statsClient.auth('309af1d4ee9e9a950f52ebe9bd6343cc',redis.print);
+statsClient.on("error", function (err) {
+    console.log("Error connecting to Stats Redis (check auth) " + err);  
 });
 
 /***********  Auth Strategies **********************/
@@ -127,13 +180,13 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
+  function(req, res) {    
+    req.session.user = {username:req.user.displayName,id:req.user.emails[0].value,profile:req.user.identifier, type:'google'};
     res.redirect('/');
   });
   
   app.get('/auth/facebook', 
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  passport.authenticate('facebook', { failureRedirect: '/login',scope: ['email', 'manage_notifications']  }),
   function(req, res) {
     res.redirect('/');
   });
@@ -141,26 +194,29 @@ app.get('/auth/google/callback',
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
+    req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.profileUrl, type:'facebook'};
     res.redirect('/');
   });
 
 app.get('/auth/twitter', 
   passport.authenticate('twitter', { failureRedirect: '/login' }),
-  function(req, res) {
+  function(req, res) {    
     res.redirect('/');
   });
 
 app.get('/auth/twitter/callback', 
   passport.authenticate('twitter', { failureRedirect: '/login' }),
   function(req, res) {
+    req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.id, type:'twitter'};
     res.redirect('/');
   });
 
-app.get('/', function(req, res){ 
+app.get('/', function(req, res){     
+    var userName = req.session.user.userName || 'Guest';
     res.render('maps',{productFields:[['category','select','Hospital',['Pharmacy','Hospital','Hotel','SuperMarket','Train-Airport','Religious','Club','Ministry','Company','Restaurant','Cinema','School-Faculty']]
                         ,['title','text'],['price','number',0],['isAvailable','checkbox',true]
                         ,['owner','text'],['description','textarea'],['offlineDate','date'],['picture','url']]
-                    });
+                    , userName:userName});
     //res.send("Hello");
 });
 
@@ -244,7 +300,7 @@ app.post('/storelocation', function(req, res){
   if(req.body.keywords){
       var or = [];
       for(var i=0; i<req.body.keywords.length;i++){
-          or[i]={ title : { $regex : new RegExp(req.body.keywords[i],'i') } };
+          or[i]={ title : { $regex : new RegExp('\\W*'+req.body.keywords[i]+'\\W*','i') } };
       }
       filters = {category:req.body.category,$or:or};
   }
@@ -366,3 +422,86 @@ function ensureAuthenticated(req, res, next) {
 
 /*** Launch the server on env port or use 3000 by default ****/
 app.listen(appPort);
+
+
+/*
+Google profile : { displayName: 'kpotufe guillaume',
+  emails: [ { value: 'mcguy2008@gmail.com' } ],
+  name: { familyName: 'guillaume', givenName: 'kpotufe' },
+  identifier: 'https://www.google.com/accounts/o8/id?id=AItOawn5t2c6m-0x_AIQfbWeBd2apahRHGPkGf0' }
+  ------------------------------------------------------
+Facebook profile : { provider: 'facebook',
+  id: '1375851602',
+  username: undefined,
+  displayName: 'Guillaume Kpotufe',
+  name: 
+   { familyName: 'Kpotufe',
+     givenName: 'Guillaume',
+     middleName: undefined },
+  gender: 'male',
+  profileUrl: 'http://www.facebook.com/profile.php?id=1375851602',
+  emails: [ { value: undefined } ],
+  _raw: '{"id":"1375851602","name":"Guillaume Kpotufe","first_name":"Guillaume","last_name":"Kpotufe","link":"http:\\/\\/www.facebook.com\\/profile.php?id=1375851602","bio":"William Lovewin, the man and the artist.","quotes":"Carpe Diem","education":[{"school":{"id":"112000482160088","name":"Coll\\u00e8ge Protestant Lom\\u00e9 Tokoin 1999-2003"},"type":"High School","with":[{"id":"1167797350","name":"Ekpe Hoassi"}]},{"school":{"id":"102211456488002","name":"College Protestant de Lome"},"type":"High School","with":[{"id":"1328064539","name":"Spero Adzessi"}]},{"school":{"id":"115212441823617","name":"ENSIAS"},"type":"College"}],"gender":"male","timezone":1,"locale":"fr_FR","verified":true,"updated_time":"2012-04-29T20:21:07+0000"}',
+  _json: 
+   { id: '1375851602',
+     name: 'Guillaume Kpotufe',
+     first_name: 'Guillaume',
+     last_name: 'Kpotufe',
+     link: 'http://www.facebook.com/profile.php?id=1375851602',
+     bio: 'William Lovewin, the man and the artist.',
+     quotes: 'Carpe Diem',
+     education: [ [Object], [Object], [Object] ],
+     gender: 'male',
+     timezone: 1,
+     locale: 'fr_FR',
+     verified: true,
+     updated_time: '2012-04-29T20:21:07+0000' } }
+  ------------------------------------------------------
+Twitter profile : { provider: 'twitter',
+  id: 301400761,
+  username: 'Wlovewin',
+  displayName: 'Kpotufe Guillaume ',
+  _raw: '{"id":301400761,"id_str":"301400761","name":"Kpotufe Guillaume ","screen_name":"Wlovewin","location":"","description":"","url":null,"protected":false,"followers_count":2,"friends_count":3,"listed_count":0,"created_at":"Thu May 19 12:10:12 +0000 2011","favourites_count":0,"utc_offset":null,"time_zone":null,"geo_enabled":false,"verified":false,"statuses_count":0,"lang":"fr","contributors_enabled":false,"is_translator":false,"profile_background_color":"C0DEED","profile_background_image_url":"http:\\/\\/a0.twimg.com\\/images\\/themes\\/theme1\\/bg.png","profile_background_image_url_https":"https:\\/\\/si0.twimg.com\\/images\\/themes\\/theme1\\/bg.png","profile_background_tile":false,"profile_image_url":"http:\\/\\/a0.twimg.com\\/sticky\\/default_profile_images\\/default_profile_4_normal.png","profile_image_url_https":"https:\\/\\/si0.twimg.com\\/sticky\\/default_profile_images\\/default_profile_4_normal.png","profile_link_color":"0084B4","profile_sidebar_border_color":"C0DEED","profile_sidebar_fill_color":"DDEEF6","profile_text_color":"333333","profile_use_background_image":true,"show_all_inline_media":false,"default_profile":true,"default_profile_image":true,"following":false,"follow_request_sent":false,"notifications":false}',
+  _json: 
+   { id: 301400761,
+     id_str: '301400761',
+     name: 'Kpotufe Guillaume ',
+     screen_name: 'Wlovewin',
+     location: '',
+     description: '',
+     url: null,
+     protected: false,
+     followers_count: 2,
+     friends_count: 3,
+     listed_count: 0,
+     created_at: 'Thu May 19 12:10:12 +0000 2011',
+     favourites_count: 0,
+     utc_offset: null,
+     time_zone: null,
+     geo_enabled: false,
+     verified: false,
+     statuses_count: 0,
+     lang: 'fr',
+     contributors_enabled: false,
+     is_translator: false,
+     profile_background_color: 'C0DEED',
+     profile_background_image_url: 'http://a0.twimg.com/images/themes/theme1/bg.png',
+     profile_background_image_url_https: 'https://si0.twimg.com/images/themes/theme1/bg.png',
+     profile_background_tile: false,
+     profile_image_url: 'http://a0.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
+     profile_image_url_https: 'https://si0.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
+     profile_link_color: '0084B4',
+     profile_sidebar_border_color: 'C0DEED',
+     profile_sidebar_fill_color: 'DDEEF6',
+     profile_text_color: '333333',
+     profile_use_background_image: true,
+     show_all_inline_media: false,
+     default_profile: true,
+     default_profile_image: true,
+     following: false,
+     follow_request_sent: false,
+     notifications: false } }
+
+
+
+*/
