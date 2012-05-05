@@ -9,7 +9,7 @@ block content
             span.action  Click: 
             small: i Find an element near current position.
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
-            small: i Create an element at current position.
+            small: i Create an element at current position.&nbsp;&nbsp;
             span#quick-create-product(title='Create near current position',onclick='createProductAt()') 
         #map-filters.blockheader.ui-corner-top
           small 
@@ -42,6 +42,7 @@ block content
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
             $( "#quick-create-product" ).button({text: false,icons: {primary: "ui-icon-plus"}});            
+            $( ".button" ).button();            
       });
 
   

@@ -8,6 +8,7 @@ var zoom=4;
 var isAuthenticated=false;
 function setAuthenticated(auth){
     isAuthenticated=auth;    
+    console.log("auth?",auth);
 }
 function initialize() {
       var myOptions = {
@@ -120,8 +121,8 @@ function initialize() {
         $(".product-result").html("");    
         var content="<table width='100%'>";
         for(var i=0;i<data.products.length;i++){             
-             content+="<tr class='product-item' onclick='productDetails("+i+")' onmouseout='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+data.products[i]._id+"'>";
-             content+="<td width='85%'><b>"+data.products[i].title+"</td>";             
+             content+="<tr class='product-item'  onmouseout='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+data.products[i]._id+"'>";
+             content+="<td width='85%' onclick='productDetails("+i+")'><b>"+data.products[i].title+"</td>";             
              content+="</td><td> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
              content+=" <i class='action-remove' title='Delete the product' onclick='productRemove("+i+")'/> ";
              content+="</td></tr>";
@@ -139,6 +140,11 @@ function initialize() {
  }
 
  function productRemove(i){
+     if(!isAuthenticated){
+         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         console.log("Not Auth");
+         return;
+     }
      if (confirm("Sure you wanna delete it?")){
          var url = '/deleteproduct';
          $.post( url,{_id:allProducts[i]._id});
@@ -148,6 +154,10 @@ function initialize() {
  
  
  function productEdit(i){     
+     if(!isAuthenticated){
+         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         return;
+     }
     //Fill all values    
     $.colorbox({inline:true,href:"#dialog-form",opacity:0.7});          
     newProductvalidator.resetForm();
@@ -174,6 +184,10 @@ function initialize() {
  
  function productScore(i,type){     
      //type: -1=dislike, -2=erronous, 1=like, 
+     if(!isAuthenticated){
+         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         return;
+     }
  }
  
  function newProductInit() {        
@@ -195,7 +209,11 @@ function initialize() {
  }
  
  function createProductAt(loc){
-    var loc = loc || map.getPosition();
+    if(!isAuthenticated){
+         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         return;
+     } 
+    var loc = loc || marker.getPosition();
     $("#newproductform #locationLng").val(loc.lng());
     $("#newproductform #locationLat").val(loc.lat());          
     geocoder.geocode({'latLng': loc}, function(results, status) {

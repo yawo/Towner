@@ -45,8 +45,8 @@ var RedisStore = require('connect-redis')(express);
 // Configuration
 app.configure(function(){
   app.set('delait_protocol','http');
-  app.set('dealit_host','yawotests.herokuapp.com');
-  app.set('dealit_port',appPort);
+  app.set('dealit_host','googlemaps.mcguy.c9.io');
+  app.set('dealit_port',80);//appPort);
   app.set('redis_port',redisPort);
   app.set('redis_host',redisHost);
   app.set('redis_auth',redisPass); 
@@ -58,6 +58,7 @@ app.configure(function(){
   app.use(express.cookieParser(sessionSecret));
   app.use(express.session({ store: new RedisStore({host:redisHost, port:redisPort,pass:redisPass}), secret: sessionSecret }));
   //app.use(express.session({ secret: "keyboard cat" }));
+  app.use(passport.initialize());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
   
@@ -198,9 +199,8 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 
-app.get('/login', function(req, res){  
-  req.session.destroy();  
-  res.render('login');
+app.get('/login', function(req, res){    
+  res.render('login',{userName:"Guest",isAuthenticated:req.session.isAuthenticated});
 });
 
 app.get('/auth/google', 
@@ -212,7 +212,7 @@ app.get('/auth/google',
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {    
-    req.session.user = {username:req.user.displayName,id:req.user.emails[0].value,profile:req.user.identifier, type:'google'};
+    req.session.user = {userName:req.user.displayName,id:req.user.emails[0].value,profile:req.user.identifier, type:'google'};
     req.session.isAuthenticated=true;
     res.redirect('/');
   });
@@ -226,7 +226,7 @@ app.get('/auth/google/callback',
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
-    req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.profileUrl, type:'facebook'};
+    req.session.user = {userName:req.user.displayName,id:req.user.id,profile:req.user.profileUrl, type:'facebook'};
     req.session.isAuthenticated=true;
     res.redirect('/');
   });
@@ -240,7 +240,7 @@ app.get('/auth/twitter',
 app.get('/auth/twitter/callback', 
   passport.authenticate('twitter', { failureRedirect: '/login' }),
   function(req, res) {
-    req.session.user = {username:req.user.displayName,id:req.user.id,profile:req.user.id, type:'twitter'};
+    req.session.user = {userName:req.user.displayName,id:req.user.id,profile:req.user.id, type:'twitter'};
     req.session.isAuthenticated=true;
     res.redirect('/');
   });
