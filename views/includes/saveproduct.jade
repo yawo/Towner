@@ -1,7 +1,7 @@
 #dialog-form(title='Create new product')
       h4.ui-corner-all Please fill the element informations.
       small You should be connected.
-      form(method="post", action="saveproduct",id="newproductform")
+      form(method="post",enctype="multipart/form-data", action="saveproduct",id="newproductform")
         table
           - each field in productFields
             - fname = field[0]

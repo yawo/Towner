@@ -49,5 +49,11 @@ html
     script      
       $(function() {          
             $( ".button" ).button(); 
+            $('body').keyup(function(e){
+                if(e.which == 27){
+                  $(".product-details").remove(); 
+                  console.log("Esc");
+                }
+        });
       });
     

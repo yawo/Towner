@@ -3,7 +3,7 @@ var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
 //This is the compilation of partials/product.jade template
-var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b><br/><div id="product-details-description"></div></div>';
+var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b>(<small>press <b>Esc</b> to close</small>)<br/><div id="product-details-description"></div></div>';
 var zoom=4;
 var isAuthenticated=false;
 function setAuthenticated(auth){
@@ -121,7 +121,7 @@ function initialize() {
         $(".product-result").html("");    
         var content="<table width='100%'>";
         for(var i=0;i<data.products.length;i++){             
-             content+="<tr class='product-item'  onmouseout='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+data.products[i]._id+"'>";
+             content+="<tr class='product-item'  onmouseoutNO='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+data.products[i]._id+"'>";
              content+="<td width='85%' onclick='productDetails("+i+")'><b>"+data.products[i].title+"</td>";             
              content+="</td><td> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
              content+=" <i class='action-remove' title='Delete the product' onclick='productRemove("+i+")'/> ";
@@ -167,11 +167,13 @@ function initialize() {
  }
  
  function productDetails(i){         
-    $("#"+allProducts[i]._id).addClass('ui-state-hover');       
+    $(".product-item").removeClass('ui-state-hover'); 
+    $(".product-details").remove();
+    $("#"+allProducts[i]._id).addClass('ui-state-hover');           
     $('#towner-main').append(productDetailsTemplate);  
     //Fill values
     for(var field in allProducts[i]){
-        $("#product-details-"+field).val(allProducts[i][field] || 'n/a');           
+        $("#product-details-"+field).html(allProducts[i][field] || 'n/a');           
     }
     
  }

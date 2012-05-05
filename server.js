@@ -53,7 +53,8 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('view options', {layout:false});
-  app.use(express.bodyParser());
+  //app.use(express.bodyParser());
+  app.use(express.bodyParser({uploadDir:'./uploads'}));
   app.use(express.methodOverride());  
   app.use(express.cookieParser(sessionSecret));
   app.use(express.session({ store: new RedisStore({host:redisHost, port:redisPort,pass:redisPass}), secret: sessionSecret }));
