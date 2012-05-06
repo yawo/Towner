@@ -20,7 +20,7 @@
 */
 #cboxOverlay{background:#000;}
 #colorbox{}
-    #cboxTopLeft{width:14px; height:14px; background:url(images/controls.png) no-repeat 0 0;}
+/*    #cboxTopLeft{width:14px; height:14px; background:url(images/controls.png) no-repeat 0 0;}
     #cboxTopCenter{height:14px; background:url(images/border.png) repeat-x top left;}
     #cboxTopRight{width:14px; height:14px; background:url(images/controls.png) no-repeat -36px 0;}
     #cboxBottomLeft{width:14px; height:43px; background:url(images/controls.png) no-repeat 0 -32px;}
@@ -49,3 +49,4 @@
         .cboxSlideshow_on #cboxSlideshow:hover{background-position:-150px 0px;}
         .cboxSlideshow_off #cboxSlideshow{background-position:-150px -25px; right:27px;}
         .cboxSlideshow_off #cboxSlideshow:hover{background-position:-125px 0px;}
+*/

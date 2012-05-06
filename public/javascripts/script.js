@@ -2,7 +2,7 @@ var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
-var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.85,top:135,left:165};
+var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.4,top:135,left:300};
 //This is the compilation of partials/product.jade template
 var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b>(<small>press <b>Esc</b> to close</small>)<br/><div id="product-details-description"></div></div>';
 var zoom=5;
