@@ -1,25 +1,21 @@
-
 //Auth Keys
 
 var FLICKR_KEY          = '15a7e0491bf5b3fc921ce7ccea8d7727';
 var FLICKR_SECRET       = '452b077e4c78db39';
-var flickr_oauth        = { "auth": { 
-    "access_token": { "oauth_token": "72157629598753248-b6304d99674e8b27", "oauth_token_secret": "717ac384bfeac0f0" } }, "stat": "ok" };
 
 var FACEBOOK_APP_ID     = '281707958585235'; 
 var FACEBOOK_APP_SECRET = 'd0fd783c08659809fa3fe6da7647de0c';
 
 var TWITTER_APP_ID      = 'cJrWnw1NgQ8PJb7J0QbRw'; 
 var TWITTERK_APP_SECRET = '8FvfzmM31qIvKrUR1fhrtNRHFcK0w4IGOEImqWI';
-//access token :  301400761-QFta92FPdGmKCsrZLPKRVNZ0uTNQUrZDnxnkAM0
-//access token secret:  r5ExRRRBax1MRjVB50V5ciSOAf1fZGBvMxfFZuck3Y
 
 //Authentication. (Passport)
-var passport = require('passport')
-  , util = require('util')  
-  , GoogleStrategy = require('passport-google').Strategy
-  , FacebookStrategy = require('passport-facebook').Strategy
-  , TwitterStrategy = require('passport-twitter').Strategy;
+var passport            = require('passport')
+  , util                = require('util')
+  , fs                  = require('fs')
+  , GoogleStrategy      = require('passport-google').Strategy
+  , FacebookStrategy    = require('passport-facebook').Strategy
+  , TwitterStrategy     = require('passport-twitter').Strategy;
   
 
 passport.serializeUser(function(user, done) {
@@ -42,6 +38,7 @@ var sessionSecret = 'keyboard cat';
 var MONGO_URL       = "mongodb://root:root@ds033047.mongolab.com:33047/product";
 var MONGO_USERS_URL = "mongodb://townerlabs:mohafada@dbh75.mongolab.com:27757/users";
 var RedisStore = require('connect-redis')(express);
+
 // Configuration
 app.configure(function(){
   app.set('delait_protocol','http');
@@ -53,7 +50,6 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('view options', {layout:false});
-  //app.use(express.bodyParser());
   app.use(express.bodyParser({uploadDir:'./uploads'}));
   app.use(express.methodOverride());  
   app.use(express.cookieParser(sessionSecret));
@@ -86,18 +82,18 @@ flickr.getLoginUrl("write", null, function(error, url, frob) {
 
 app.get('/auth/flickr/callback', function(req,res){
   console.log("frob",req.query.frob);  
-  flickr.auth.getToken(req.query.frob, function(error, res){
-      console.log("flickrFrob",flickrFrob);
-      console.log("Res",res);
-      flickrAuthToken = res.token;
-      flickr.setAuthenticationToken(flickrAuthToken);
+  var status = 'success';
+  flickr.auth.getToken(req.query.frob, function(error, result){
+      if(error){
+          status = err;
+      }else{
+          console.log("flickrFrob",flickrFrob);
+          console.log("Res",result);
+          flickrAuthToken = result.token;
+          flickr.setAuthenticationToken(flickrAuthToken);
+      }
+      res.send(status+"  <br/> Go back to <a href='/'>Home</a>");
     });
-    
-    flickr.people.getInfo(function(res){
-        console.log("flick infos",res);
-    });
-    
-    res.send("Ok. Goto <a href='/'>Home</a>");
 });
 
 
@@ -230,7 +226,7 @@ app.get('/auth/facebook/callback',
     req.session.user = {userName:req.user.displayName,id:req.user.id,profile:req.user.profileUrl, type:'facebook'};
     req.session.isAuthenticated=true;
     res.redirect('/');
-  });
+  }); 
 
 app.get('/auth/twitter', 
   passport.authenticate('twitter', { failureRedirect: '/login' }),
@@ -249,20 +245,20 @@ app.get('/auth/twitter/callback',
 app.get('/', function(req, res){     
     
     var userName = (req.session.user)?req.session.user.userName:'Guest';
-    res.render('maps',{productFields:[['category','select','Hospital',['Pharmacy','Hospital','Hotel','SuperMarket','Train-Airport','Religious','Club','Ministry','Company','Restaurant','Cinema','School-Faculty']]
+    res.render('maps',{productFields:[['category','select','Hospital',['Pharmacy','Parking','Hospital','Hotel','SuperMarket','Train-Airport','Religious','Club','Ministry','Company','Restaurant','Cinema','School-Faculty']]
                         ,['title','text'],['price','number',0],['isAvailable','checkbox',true]
-                        ,['owner','text'],['description','textarea'],['offlineDate','date'],['picture','url']]
+                        ,['owner','text'],['description','textarea'],['offlineDate','date']]
                     , userName:userName, isAuthenticated:req.session.isAuthenticated});
     //res.send("Hello");
 });
 
-app.post('/saveproduct',ensureAuthenticated, function(req, res){    
-    var data =  {title:req.body.title
+function saveProduct(req,res,photoUrl){
+       var data =  {title:req.body.title
           ,category:req.body.category
           ,price:req.body.price
           ,description:req.body.description
           ,owner:req.body.owner
-          ,picture:req.body.picture
+          ,picture:photoUrl
           ,offlineDate:req.body.offlineDate
           ,isAvailable:req.body.isAvailable
           ,location:[req.body.locationLng,req.body.locationLat]
@@ -274,11 +270,11 @@ app.post('/saveproduct',ensureAuthenticated, function(req, res){
           ,category:req.body.category
           ,price:req.body.price
           ,description:req.body.description
-          ,owner:req.body.owner
-          ,picture:req.body.picture
+          ,owner:req.body.owner          
           ,offlineDate:req.body.offlineDate
           ,isAvailable:req.body.isAvailable          
           };
+      if(photoUrl) data.picture = photoUrl;
       var conditions = { _id:req.body._id }
       , options = { multi: true };    
         Product.update(conditions, data, options, function (err, numAffected) {
@@ -301,6 +297,42 @@ app.post('/saveproduct',ensureAuthenticated, function(req, res){
                   console.log(req.body.title," created ");
               }   
         });
+    }
+}
+
+
+app.post('/saveproduct',ensureAuthenticated, function(req, res){
+    console.log("Save prod");
+    if(req.files && req.files.picture){
+        flickr.upload.async(req.files.picture.path, req.body.category+'_'+req.body.title, {}, function(err,ticket){
+            var photoUrl = 'n/a';
+            if(err){
+                console.log("Error",err);
+                return saveProduct(req,res); 
+            }else{                
+                console.log("Ticket",ticket);                
+                flickr.photos.getSizes(ticket, 0, function(err2, sizes, idx){
+                    if(err2){
+                        console.log("Error",err2);
+                        return saveProduct(req,res); 
+                    }else{
+                        photoUrl = sizes.size[3].source;
+                        console.log("source",photoUrl);
+                        return saveProduct(req,res,photoUrl);
+                        //remove picture from upload.
+                        fs.unlink(req.files.picture.path, function(err3) {
+                            if (err3) {
+                                console.log("Error",err2);
+                            }else{
+                                res.send('File removed');
+                            }
+                        });
+                    }
+                });     
+            }            
+        });
+    }else{
+        return saveProduct(req,res); 
     }
 });
 
@@ -376,7 +408,7 @@ ProductSchema.index({location:"2d",category:1,title:1,description:1,isAvailable:
 
 var Product = mongoose.model('Product',ProductSchema);
 
-//Insert products
+//Insert products : no more used.
 var products = [];
  products[0] = new Product({ 
     title       : 'P1'
@@ -385,30 +417,6 @@ var products = [];
   , onlineDate  : new Date()
   , owner       : 'Mohafada'
   , location    : [10,10]});
- 
- products[1] = new Product({ 
-     title       : 'P2'
-  , price       : '50'
-  , isAvailable : true
-  , onlineDate  : new Date()
-  , owner       : 'FisdeLom'
-  , location    : [150,10]});
- 
- products[2] = new Product({ 
-     title       : 'P3'
-  , price       : '50'
-  , isAvailable : true
-  , onlineDate  : new Date()
-  , owner       : 'GuiLeBon'
-  , location    : [150,150]});
-  
- products[3] = new Product({ 
-     title       : 'P4'
-  , price       : '50'
-  , isAvailable : true
-  , onlineDate  : new Date()
-  , owner       : 'PlaizGo'
-  , location    : [10,150]});
   
   /*products.forEach(function(prod){
       prod.save(function(err){
@@ -446,19 +454,18 @@ function findProductNear(loc){
             docs = res;
         }
     }
-    
     return docs;
 }
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
+  console.log("Ensure",req.session.isAuthenticated);
+  if (req.session.isAuthenticated) { return next(); }
   res.redirect('/login')
 }
 
 
 /*** Launch the server on env port or use 3000 by default ****/
 app.listen(appPort);
-
 
 /*
 Google profile : { displayName: 'kpotufe guillaume',
@@ -541,3 +548,4 @@ Twitter profile : { provider: 'twitter',
 
 
 */
+

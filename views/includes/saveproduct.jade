@@ -1,12 +1,12 @@
-#dialog-form(title='Create new product')
-      h4.ui-corner-all Please fill the element informations.
-      small You should be connected.
-      form(method="post",enctype="multipart/form-data", action="saveproduct",id="newproductform")
+#dialog-form(title='Create new product').ui-corner-all
+      .dialog-invite 
+        b Please fill the element's informations.
+      form.form-content(method="post",enctype="multipart/form-data", action="saveproduct",id="newproductform")
         table
           - each field in productFields
             - fname = field[0]
             - ftype = field[1]
-            - fvalue = field[2]
+            - fvalue= field[2]
             tr
                td
                  label(for=fname)= fname
@@ -26,8 +26,15 @@
                     input.text.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue,checked=(fvalue?'checked':''))                     
                  else if ftype == "url"
                     input.url.text.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue,placeholder='Copy url here'))                     
+                 else if ftype == "file"
+                    input.file.text.ui-widget-content.ui-corner-all(type=ftype,name=fname,id=fname,value=fvalue,placeholder='Upload a file'))                     
                  else
                     input.text.required.ui-widget-content.ui-corner-all(type=ftype, name=fname,id=fname,value=fvalue)
+          tr
+            td 
+              label(for='picture') picture
+            td
+              input.file.ui-widget-content.ui-corner-all(type='file',name='picture',id='picture',placeholder='Upload a picture'))                     
         input(id="locationLng",name="locationLng",type="hidden")         
         input(id="locationLat",name="locationLat",type="hidden")
         input(id="locationStr",name="locationStr",type="hidden")

@@ -2,9 +2,10 @@ var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
+var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.85,top:135,left:165};
 //This is the compilation of partials/product.jade template
 var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b>(<small>press <b>Esc</b> to close</small>)<br/><div id="product-details-description"></div></div>';
-var zoom=4;
+var zoom=5;
 var isAuthenticated=false;
 function setAuthenticated(auth){
     isAuthenticated=auth;    
@@ -99,8 +100,8 @@ function initialize() {
         if (results[1]) { 
           //map.setZoom(zoom)
           //$(".result").html("Your click position is (Lat/Long) : <b>"+location.lat()+" / "+location.lng()+".</b> ("+results[1].formatted_address+")");
-          $(".result").html("Near Lng/Lat »: <b>"+results[1].formatted_address+".</b> ("
-                  +Math.round(location.lng()*1000)/1000+" / "+Math.round(location.lat()*1000)/1000+")");
+          $(".result").html("<small>Near  » <b>"+results[1].formatted_address+".</b> (lng:"
+                  +Math.round(location.lng()*100)/100+", lat:"+Math.round(location.lat()*100)/100+")<small>");
              
              fetchProducts([location.lng(),location.lat()]);
         }
@@ -159,7 +160,7 @@ function initialize() {
          return;
      }
     //Fill all values    
-    $.colorbox({inline:true,href:"#dialog-form",opacity:0.7});          
+    $.colorbox(colorBoxOptions);          
     newProductvalidator.resetForm();
     for(var field in allProducts[i]){
         $("#newproductform #"+field).val(allProducts[i][field]);           
@@ -174,9 +175,8 @@ function initialize() {
     //Fill values
     for(var field in allProducts[i]){
         $("#product-details-"+field).html(allProducts[i][field] || 'n/a');           
-    }
-    
- }
+    }    
+ } 
  
  
  function productDetailsClear(i){     
@@ -227,6 +227,6 @@ function initialize() {
         console.log("Geocoder failed due to: " + status);
       }
     });     
-    $.colorbox({inline:true,href:"#dialog-form",opacity:0.7});      
+    $.colorbox(colorBoxOptions);      
  }
  
