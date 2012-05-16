@@ -11,9 +11,10 @@
     "less":">=0.0.1",
     "mongoose":">=0.0.1",
     "redis":">=0.0.1",
-    " connect-redis":">=0.0.1",   
+    "connect-redis":">=0.0.1",   
     "passport":">=0.0.1",
     "passport-google":">=0.0.1",
-    "passport-facebook":">=0.0.1"
+    "passport-facebook":">=0.0.1",
+    "socket.io":">=0.0.1"
   }
 }

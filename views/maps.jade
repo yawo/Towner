@@ -32,6 +32,19 @@ block content
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
             small: i Edit the element.
         p.product-result 
+        #paginate.blockheader.ui-corner-bottom
+          // optional left control buttons 
+          nav#paginate_m_left
+          nav#paginate_o_left
+          .paginator_p_wrap
+            .paginator_p_bloc
+              //<a class='paginator_p'></a> // page number : dynamically added 
+          //optional right control buttons 
+          nav#paginate_o_right
+          nav#paginate_m_right
+          //slider 
+          .paginator_slider.ui-slider.ui-slider-horizontal.ui-widget.ui-widget-content.ui-corner-all
+            a.ui-slider-handle.ui-state-default.ui-corner-all(href='#')
      
   .ui-helper-hidden
     include includes/saveproduct

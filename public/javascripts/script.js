@@ -3,10 +3,14 @@ var productIndex=0;
 var allProducts = [];
 var newProductvalidator;
 var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.4,top:135,left:300};
+var serverUrl = 'http://googlemaps.mcguy.c9.io';
 //This is the compilation of partials/product.jade template
 var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b>(<small>press <b>Esc</b> to close</small>)<br/><div id="product-details-description"></div></div>';
 var zoom=5;
 var isAuthenticated=false;
+var enums = {
+    scores:{mark:2,like:1,unlike:-1,erronous:-2}
+};
 function setAuthenticated(auth){
     isAuthenticated=auth;    
     console.log("auth?",auth);
@@ -184,12 +188,23 @@ function initialize() {
     $(".product-details").remove();
  }
  
- function productScore(i,type){     
-     //type: -1=dislike, -2=erronous, 1=like, 
+ function productScore(type,val){     
+     //type: -1=dislike, -2=erronous, 1=like,2=mark 
      if(!isAuthenticated){
          $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
          return;
-     }
+     }else{         
+         switch(type){
+            case enums.scores.mark:
+                 break;
+            case enums.scores.like:
+                 break;
+            case enums.scores.unlike:
+                 break;
+            case enums.scores.erronous:
+                 break;     
+         }
+    }
  }
  
  function newProductInit() {        
@@ -229,4 +244,21 @@ function initialize() {
     });     
     $.colorbox(colorBoxOptions);      
  }
- 
+ /******* Socket.io ***************/
+    //var socket = io.connect(serverUrl);
+    /* socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+    });*/
+    
+    var channel1 = io.connect(serverUrl+'/channel1?token=aXoqIwP');
+    channel1.on('news', function (data) {
+        console.log(data);
+        channel1.emit('my other event', { my: 'data' });
+    });
+    
+    var channel2 = io.connect(serverUrl+'/channel2?token=aXoqIwP');
+    channel2.on('news', function (data) {
+        console.log(data);
+        channel2.emit('my other event', { my: 'data' });
+    });

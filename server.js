@@ -28,36 +28,79 @@ passport.deserializeUser(function(obj, done) {
 
 
 
-var express = require('express'), http = require('http');
-//var app = module.exports = express.createServer();
-var app     = express.createServer();
-var appPort = (process.env.PORT || process.env['app_port'] || 3000); 
-var redisPort   = 9002,redisHost ='panga.redistogo.com', redisPass ='5f5a23fad61370502faadb5bcb860bfa';
-var sessionSecret = 'keyboard cat';
+var express = require('express');
 
+
+
+//var app = module.exports = express.createServer(); <-- This causes errors on Heroku.
+var app = express.createServer();
+var socketio = require('socket.io');
+var io  = socketio.listen(app);
+var appPort = (process.env.PORT || process.env['app_port'] || 3000); 
+
+/************* REDIS ***************/
+
+//Redis for socket.io : real time stats. broadcasting etc.
+var redisPort   = 9002,redisHost ='panga.redistogo.com', redisPass ='5f5a23fad61370502faadb5bcb860bfa';
+//Redis for session management
+var redisPort2   = 9136,redisHost2 ='panga.redistogo.com', redisPass2 ='309af1d4ee9e9a950f52ebe9bd6343cc';
+var redisExpress = require("redis");
+var redis = require('socket.io/node_modules/redis');
+//redis.debug_mode = true;
+
+
+var RedisStore = require('connect-redis')(express);
+var client = redisExpress.createClient(redisPort2,redisHost2);
+client.on("error", function (err) {
+    console.log("Error connecting to Redis (check auth) " + err);  
+});
+client.auth(redisPass2,redisExpress.print);
+
+var sessionRedisStore = new RedisStore({client:client});
+
+var statsPub=redis.createClient(redisPort,redisHost);
+statsPub.on("error", function (err) {
+    console.log("Error connecting to Stats Redis (check auth) " + err);  
+});
+statsPub.auth(redisPass,redis.print);
+var statsSub=redis.createClient(redisPort,redisHost);
+statsSub.on("error", function (err) {
+    console.log("Error connecting to Stats Redis (check auth) " + err);  
+});
+statsSub.auth(redisPass,redis.print);
+var statsClient=redis.createClient(redisPort,redisHost);
+statsClient.on("error", function (err) {
+    console.log("Error connecting to Stats Redis (check auth) " + err);  
+});
+statsClient.auth(redisPass,redis.print);
+
+var socketRedisOpts = {redisSub:statsSub,redisPub:statsPub,redisClient:statsClient};
+var sessionSecret = 'keyboard cat';
+ 
 var MONGO_URL       = "mongodb://root:root@ds033047.mongolab.com:33047/product";
 var MONGO_USERS_URL = "mongodb://townerlabs:mohafada@dbh75.mongolab.com:27757/users";
-var RedisStore = require('connect-redis')(express);
-
+var connect = require('./node_modules/express/node_modules/connect/lib/connect');
+var parseCookie = connect.utils.parseCookie;
+var Session = connect.middleware.session.Session;
 // Configuration
 app.configure(function(){
   app.set('delait_protocol','http');
-  app.set('dealit_host','googlemaps.mcguy.c9.io');
+  app.set('dealit_host','googlemaps.mcguy.c9.io');   //HEROKU
   app.set('dealit_port',80);//appPort);
-  app.set('redis_port',redisPort);
-  app.set('redis_host',redisHost);
-  app.set('redis_auth',redisPass); 
+  app.set('redis_port',redisPort2);
+  app.set('redis_host',redisHost2);
+  app.set('redis_auth',redisPass2); 
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('view options', {layout:false});
   app.use(express.bodyParser({uploadDir:'./uploads'}));
   app.use(express.methodOverride());  
   app.use(express.cookieParser(sessionSecret));
-  app.use(express.session({ store: new RedisStore({host:redisHost, port:redisPort,pass:redisPass}), secret: sessionSecret }));
+  app.use(express.session({ store: sessionRedisStore, secret: sessionSecret , key: 'express.sid' }));
   //app.use(express.session({ secret: "keyboard cat" }));
   app.use(passport.initialize());
-  app.use(app.router);
   app.use(express.static(__dirname + '/public'));
+  app.use(app.router);
   
 });
 app.configure('development', function(){
@@ -66,6 +109,142 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler());
 });
+
+io.configure( function(){  
+    io.set('store',new socketio.RedisStore(socketRedisOpts));
+    io.enable('browser client minification');  // send minified client
+    io.enable('browser client etag');          // apply etag caching logic based on version number
+    //io.enable('browser client gzip');          // gzip the file
+    io.set('log level', 1);                    // reduce logging with 1. raisable to 3
+    io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+        'websocket'
+        //, 'flashsocket'
+        , 'htmlfile'
+        , 'xhr-polling'
+        , 'jsonp-polling'
+    ]);
+    //io.set("transports", ["xhr-polling"]);  //HEROKU
+    //io.set("polling duration", 10);         //HEROKU
+});
+
+io.set('authorization', function (data, accept) {
+     if (data.headers.cookie) {
+        data.cookie = parseCookie(data.headers.cookie);
+        data.sessionID = data.cookie['express.sid'];
+        // save the session store to the data object 
+        // (as required by the Session constructor)
+        //data.sessionStore = sessionRedisStore;
+        sessionRedisStore.load(data.sessionID, function (err, session,t) {            
+            if (err || !session) {
+                console.log("err",err,"session:",session,"t",t);
+                return accept(err.message, false);
+            }
+        
+            data.session = session;
+            return accept(null, true);
+         });
+        /*sessionRedisStore.get(data.sessionID, function (err, session) {
+            if (err || !session) {
+                accept('Error', false);
+            } else {
+                // create a session object, passing data as request and our
+                // just acquired session data
+                var req, _ref;
+                if (session && !((_ref = session.prototype) != null ? _ref.reload : void 0)) {
+                  req = {
+                    sessionStore: sessionRedisStore,
+                    sessionID: data.sessionID
+                  };
+                  session = new express.session.Session(req, session);
+                }
+         
+                data.session = new Session(data, session);
+                accept(null, true);
+            }
+        });*/
+    } else {
+        // Check to see if the conection is made from the server
+        // ~ auth with token
+        if (data.query.secret_keyword
+             //&& (data.query.secret_keyword === configs.secret_keyword)
+             )
+        {
+          console.log("secrets",data.query.secret_keyword,configs.secret_keyword);
+          return accept(null, true);
+        }
+       return accept('No cookie transmitted.', false);
+    }
+});
+
+/************ socket.io ***********/
+/*io.sockets.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
+});*/
+io.sockets.on('error',function(err){
+         console.log('error catch!',err);
+});
+
+io.sockets.on('connection', function (socket) {
+    var hs = socket.handshake;
+    console.log('A socket with sessionID ' + hs.sessionID 
+        + ' connected!');
+    // setup an inteval that will keep our session fresh
+    var intervalID = setInterval(function () {
+        // reload the session (just in case something changed,
+        // we don't want to override anything, but the age)
+        // reloading will also ensure we keep an up2date copy
+        // of the session with our connection.
+        hs.session.reload( function () { 
+            // "touch" it (resetting maxAge and lastAccess)
+            // and save it back again.
+            hs.session.touch().save();
+        });
+    }, 60 * 1000);
+    socket.on('disconnect', function () {
+        console.log('A socket with sessionID ' + hs.sessionID 
+            + ' disconnected!');
+        // clear the socket interval to stop refreshing the session
+        clearInterval(intervalID);
+    });
+    
+    socket.on('error', function() {
+        console.log('error catch!');
+    });
+ 
+});
+
+//Multiplexing
+var channel1 = io
+  .of('/channel1')
+  .on('connection', function (socket) {
+    socket.emit('news', {
+        that: 'only'
+      , '/channel1': 'will get'
+    });
+    socket.emit('news', {
+        everyone: 'in'
+      , '/channel1': 'will get'
+    });
+    socket.on('error', function() {
+        console.log('error catch!');
+    });
+  });
+
+var channel2 = io
+  .of('/channel2')
+  .on('connection', function (socket) {
+    socket.on('error', function() {
+        console.log('error catch!');
+    });
+    socket.emit('news', { news: 'item' });
+  });
+  
+  channel2.on('my other event',function(res){
+      console.log('other evt:',res);
+  })
 
 /************* FLICKR for storing photos **************/
 
@@ -79,6 +258,10 @@ flickr.getLoginUrl("write", null, function(error, url, frob) {
     console.log("frob",frob);
     flickrFrob=frob;    
 });
+
+app.get('/socket.io/*',function(req,res){
+    console.log("Io Req",req.url);
+    });
 
 app.get('/auth/flickr/callback', function(req,res){
   console.log("frob",req.query.frob);  
@@ -136,20 +319,6 @@ function sendPhoto(photo){
   post_req.end();
 
 }
-
-/************* REDIS ***************/
-var redis = require("redis");
-var client = redis.createClient(app.settings.redis_port,app.settings.redis_host);
-client.auth(app.settings.redis_auth,redis.print);
-client.on("error", function (err) {
-    console.log("Error connecting to Redis (check auth) " + err);  
-});
-
-var statsClient=redis.createClient(9136,'panga.redistogo.com');
-statsClient.auth('309af1d4ee9e9a950f52ebe9bd6343cc',redis.print);
-statsClient.on("error", function (err) {
-    console.log("Error connecting to Stats Redis (check auth) " + err);  
-});
 
 /***********  Auth Strategies **********************/
 passport.use(new GoogleStrategy({
@@ -252,54 +421,6 @@ app.get('/', function(req, res){
     //res.send("Hello");
 });
 
-function saveProduct(req,res,photoUrl){
-       var data =  {title:req.body.title
-          ,category:req.body.category
-          ,price:req.body.price
-          ,description:req.body.description
-          ,owner:req.body.owner
-          ,picture:photoUrl
-          ,offlineDate:req.body.offlineDate
-          ,isAvailable:req.body.isAvailable
-          ,location:[req.body.locationLng,req.body.locationLat]
-          ,locationStr:req.body.locationStr
-          }; 
-          
-    if(req.body._id){
-        data =  {title:req.body.title
-          ,category:req.body.category
-          ,price:req.body.price
-          ,description:req.body.description
-          ,owner:req.body.owner          
-          ,offlineDate:req.body.offlineDate
-          ,isAvailable:req.body.isAvailable          
-          };
-      if(photoUrl) data.picture = photoUrl;
-      var conditions = { _id:req.body._id }
-      , options = { multi: true };    
-        Product.update(conditions, data, options, function (err, numAffected) {
-          if(err){
-              console.log(req.body._id," update failed");
-              res.json({status:'failure'});
-              res.json({status:'success'});
-          }
-          console.log(req.body._id," updated (",numAffected," update(s) )");
-        }); 
-        
-    }else{
-        var prd = new Product(data);
-        prd.save(function(err){
-              if(err){
-                console.log(prd.title,"Error saving:",err);
-                res.json({status:'failure'});
-              } else{
-                  res.json({status:'success'});
-                  console.log(req.body.title," created ");
-              }   
-        });
-    }
-}
-
 
 app.post('/saveproduct',ensureAuthenticated, function(req, res){
     console.log("Save prod");
@@ -376,6 +497,96 @@ app.post('/storelocation', function(req, res){
   Product.find(filters).near('location',req.session.location).limit(50).exec(slhandler);
   
 });
+
+
+//setup the errors
+app.error(function(err, req, res, next){
+    if (err instanceof NotFound) {
+        res.render('404.jade', { locals: { 
+                  title : '404 - Not Found'
+                 ,description: ''
+                 ,author: ''
+                 ,analyticssiteid: 'XXXXXXX' 
+                },status: 404 });
+    } else {
+        res.render('500.jade', { locals: { 
+                  title : 'The Server Encountered an Error'
+                 ,description: ''
+                 ,author: ''
+                 ,analyticssiteid: 'XXXXXXX'
+                 ,error: err 
+                },status: 500 });
+    }
+});
+
+//A Route for Creating a 500 Error (Useful to keep around)
+app.get('/500', function(req, res){
+    throw new Error('This is a 500 Error');
+});
+
+//The 404 Route (ALWAYS Keep this as the last route)
+/*app.get('/*', function(req, res){
+    throw new NotFound;
+});*/
+
+
+NotFound.prototype.__proto__ = Error.prototype;
+
+function NotFound(msg){
+    this.name = 'NotFound';
+    Error.call(this, msg);
+    Error.captureStackTrace(this, arguments.callee);
+}
+
+/************************************** Server functions *************************/
+function saveProduct(req,res,photoUrl){
+       var data =  {title:req.body.title
+          ,category:req.body.category
+          ,price:req.body.price
+          ,description:req.body.description
+          ,owner:req.body.owner
+          ,picture:photoUrl
+          ,offlineDate:req.body.offlineDate
+          ,isAvailable:req.body.isAvailable
+          ,location:[req.body.locationLng,req.body.locationLat]
+          ,locationStr:req.body.locationStr
+          }; 
+          
+    if(req.body._id){
+        data =  {title:req.body.title
+          ,category:req.body.category
+          ,price:req.body.price
+          ,description:req.body.description
+          ,owner:req.body.owner          
+          ,offlineDate:req.body.offlineDate
+          ,isAvailable:req.body.isAvailable          
+          };
+      if(photoUrl) data.picture = photoUrl;
+      var conditions = { _id:req.body._id }
+      , options = { multi: true };    
+        Product.update(conditions, data, options, function (err, numAffected) {
+          if(err){
+              console.log(req.body._id," update failed");
+              res.json({status:'failure'});
+              res.json({status:'success'});
+          }
+          console.log(req.body._id," updated (",numAffected," update(s) )");
+        }); 
+        
+    }else{
+        var prd = new Product(data);
+        prd.save(function(err){
+              if(err){
+                console.log(prd.title,"Error saving:",err);
+                res.json({status:'failure'});
+              } else{
+                  res.json({status:'success'});
+                  console.log(req.body.title," created ");
+              }   
+        });
+    }
+}
+
 
 /********** Connection à MongoDB ******/
 console.time("MongoDb init");
@@ -464,7 +675,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 
-/*** Launch the server on env port or use 3000 by default ****/
+
 app.listen(appPort);
 
 /*

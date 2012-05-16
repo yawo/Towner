@@ -5,12 +5,15 @@ html
     link(rel='stylesheet', href='/stylesheets/jquery-ui.css', type='text/css')
     link(rel='stylesheet/less', type='text/css', href='/stylesheets/style.less')
     script(type='text/javascript', src='/javascripts/less.js')
-    script(type='text/javascript', src='/javascripts/jquery.js')   
+    script(type='text/javascript', src='/javascripts/jquery.js')       
+    // link(href='http://fonts.googleapis.com/css?family=Oswald', rel='stylesheet', type='text/css')
     script(type='text/javascript', src='http://maps.googleapis.com/maps/api/js?key=AIzaSyCgW7lk0fz_YE5gZj_loz24rrnEECXSHqE&sensor=false')            
-    script(type='text/javascript', src='/javascripts/script.js')     
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='/javascripts/script.js')    
+    
   body
     header 
-      table(width="100%")
+      table(width="100%") 
         tr
           td.header-left
             .invite Towner
@@ -40,20 +43,36 @@ html
         b Towner labs 
         | (townerlabs@gmail.com), 2012.
     script(type='text/javascript', src='/javascripts/jquery.ui.js')    
+    script(type='text/javascript', src='/javascripts/jPaginator-min.js')        
     script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    
     script(type='text/javascript', src='/javascripts/jquery.colorbox.js')    
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js')
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/additional-methods.min.js')
-    //script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/localization/messages_fr.js')     
+    // script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/localization/messages_fr.js')     
     link(rel='stylesheet', href='/stylesheets/colorbox.css', type='text/css')
     script      
-      $(function() {          
-            $( ".button" ).button(); 
-            $('body').keyup(function(e){
+      $(function() {    
+         
+          $( ".button" ).button(); 
+          $('body').keyup(function(e){
                 if(e.which == 27){
                   $(".product-details").remove(); 
                   console.log("Esc");
                 }
-        });
+          });
       });
     
+        /*
+          WebFontConfig = {
+                    google: { families: [ 'Tangerine', 'Cantarell','Oswald' ] }
+                  };
+                  (function() {
+                    var wf = document.createElement('script');
+                    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+                        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+                    wf.type = 'text/javascript';
+                    wf.async = 'true';
+                    var s = document.getElementsByTagName('script')[0];
+                    s.parentNode.insertBefore(wf, s);
+                  })();
+        */

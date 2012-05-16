@@ -2,8 +2,20 @@
 //- Every product field 'f' is associated to an html id 'product-details-f'.
 //- Javascript will fill $(id).html() and we render the good template.
 .product-details.ui-corner-all 
-
-  b#product-details-title 
-  br
-  #product-details-description
+  span#product-details-_id.ui-helper-hidden 
+  table
+    tr.details-head
+      td
+        b#product-details-title 
+    tr      
+      td.details-description(colspan='2')
+        #product-details-description
+    tr
+      td.details-head-right
+        input.input.details-mark.ui-widget.ui-corner-all(name='details-mark',id='details-mark',placeholder='0',size="2")        
+            |  &nbsp;&nbsp;
+        span#mark-action(title='How much will you mark it on 20 points?',onclick='productScore(2)') 10
+        span#like-action(title='Did you like it ?',onclick='productScore(1)') 0 
+        span#unlike-action(title='Something hurts about it ?',onclick='productScore(-1)') 0
+        span#signal-action(title='Is this erronous or Bad ?',onclick='productScore(-2)') 0
   
