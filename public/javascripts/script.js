@@ -1,6 +1,8 @@
+//TODO : Reset currentPages, etc on filter change.
 var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
+var currentPage = 1;
 var newProductvalidator;
 var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.4,top:135,left:300};
 var serverUrl = 'http://googlemaps.mcguy.c9.io';
@@ -107,7 +109,8 @@ function initialize() {
           $(".result").html("<small>Near  » <b>"+results[1].formatted_address+".</b> (lng:"
                   +Math.round(location.lng()*100)/100+", lat:"+Math.round(location.lat()*100)/100+")<small>");
              
-             fetchProducts([location.lng(),location.lat()]);
+             //fetchProducts([location.lng(),location.lat()]);
+             loadResults(1);
         }
       } else {
         alert("Geocoder failed due to: " + status);
@@ -115,7 +118,7 @@ function initialize() {
     }); 
  }
  
- function fetchProducts(loc){
+ /*function fetchProducts(loc){
      var loc = loc || [marker.getPosition().lng(),marker.getPosition().lat()]
          ,category = $('#category-filter').val(), keywords = $('#content-filter').val();
      var url = '/storelocation',reg = new RegExp("[ ,;\+]+", "g");
@@ -123,11 +126,17 @@ function initialize() {
      $(".product-result").html("<p class='loading'>&nbsp;&nbsp;&nbsp;&nbsp;</p>");
      $.post(url,{location:loc,category:category,keywords:kw} , function(data, textStatus, jqXHR){
         //console.log("Data",data,textStatus);         
-        $(".product-result").html("");    
+       buildProductsUi(data.products);
+       allProducts[currentPage] = data.products;
+     });
+ }*/
+ 
+ function buildProductsUi(productsList){
+      $(".product-result").html("");    
         var content="<table width='100%'>";
-        for(var i=0;i<data.products.length;i++){             
-             content+="<tr class='product-item'  onmouseoutNO='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+data.products[i]._id+"'>";
-             content+="<td width='85%' onclick='productDetails("+i+")'><b>"+data.products[i].title+"</td>";             
+        for(var i=0;i<productsList.length;i++){             
+             content+="<tr class='product-item'  onmouseoutNO='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+productsList[i]._id+"'>";
+             content+="<td width='85%' onclick='productDetails("+i+")'><b>"+productsList[i].title+"</td>";             
              content+="</td><td> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
              content+=" <i class='action-remove' title='Delete the product' onclick='productRemove("+i+")'/> ";
              content+="</td></tr>";
@@ -140,8 +149,6 @@ function initialize() {
         $( ".action-mark" ).button({text: false,icons: {primary: "ui-icon-comment"}});
         $( ".action-erronous" ).button({text: false,icons: {primary: "ui-icon-cancel"}});
         $( ".product-result tr:odd" ).addClass("odd-tr");
-        allProducts = data.products;
-     });
  }
 
  function productRemove(i){
@@ -152,8 +159,8 @@ function initialize() {
      }
      if (confirm("Sure you wanna delete it?")){
          var url = '/deleteproduct';
-         $.post( url,{_id:allProducts[i]._id});
-         $("#"+allProducts[i].id).remove();
+         $.post( url,{_id:allProducts[currentPage][i]._id});
+         $("#"+allProducts[currentPage][i].id).remove();
      }
  }
  
@@ -166,25 +173,25 @@ function initialize() {
     //Fill all values    
     $.colorbox(colorBoxOptions);          
     newProductvalidator.resetForm();
-    for(var field in allProducts[i]){
-        $("#newproductform #"+field).val(allProducts[i][field]);           
+    for(var field in allProducts[currentPage][i]){
+        $("#newproductform #"+field).val(allProducts[currentPage][i][field]);           
     }
  }
  
  function productDetails(i){         
     $(".product-item").removeClass('ui-state-hover'); 
     $(".product-details").remove();
-    $("#"+allProducts[i]._id).addClass('ui-state-hover');           
+    $("#"+allProducts[currentPage][i]._id).addClass('ui-state-hover');           
     $('#towner-main').append(productDetailsTemplate);  
     //Fill values
-    for(var field in allProducts[i]){
-        $("#product-details-"+field).html(allProducts[i][field] || 'n/a');           
+    for(var field in allProducts[currentPage][i]){
+        $("#product-details-"+field).html(allProducts[currentPage][i][field] || 'n/a');           
     }    
  } 
  
  
  function productDetailsClear(i){     
-     $("#"+allProducts[i]._id).removeClass('ui-state-hover');
+     $("#"+allProducts[currentPage][i]._id).removeClass('ui-state-hover');
     $(".product-details").remove();
  }
  
@@ -244,6 +251,25 @@ function initialize() {
     });     
     $.colorbox(colorBoxOptions);      
  }
+ 
+ function loadResults(pageNum){
+     currentPage = pageNum;
+     if(!(allProducts[currentPage])){
+         var loc =  [marker.getPosition().lng(),marker.getPosition().lat()]
+         ,category = $('#category-filter').val(), keywords = $('#content-filter').val();
+         var url = '/storelocation/'+currentPage,reg = new RegExp("[ ,;\+]+", "g");
+         var kw  = (keywords?keywords.split(reg):[]);     
+         $(".product-result").html("<p class='loading'>&nbsp;&nbsp;&nbsp;&nbsp;</p>");
+         $.post(url,{location:loc,category:category,keywords:kw} , function(data, textStatus, jqXHR){
+            //console.log("Data",data,textStatus);         
+           buildProductsUi(data.products);
+           allProducts[currentPage] = data.products;
+         });         
+     }else{
+         buildProductsUi(allProducts[currentPage]);
+     }
+ }
+ 
  /******* Socket.io ***************/
     //var socket = io.connect(serverUrl);
     /* socket.on('news', function (data) {

@@ -32,7 +32,7 @@ block content
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
             small: i Edit the element.
         p.product-result 
-        #paginate.blockheader.ui-corner-bottom
+        #paginate-results.blockheader.ui-corner-bottom
           // optional left control buttons 
           nav#paginate_m_left
           nav#paginate_o_left
@@ -54,7 +54,17 @@ block content
             newProductInit();  
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
             $( "#submit-filter" ).button({text: false,icons: {primary: "ui-icon-search"}});
-            $( "#quick-create-product" ).button({text: false,icons: {primary: "ui-icon-plus"}});            
+            $( "#quick-create-product" ).button({text: false,icons: {primary: "ui-icon-plus"}}); 
+            $("#paginate-results").jPaginator({
+              nbPages:20,
+              overBtnLeft:'#paginate_o_left',
+              overBtnRight:'#paginate_o_right',
+              maxBtnLeft:'#paginate_m_left',
+              maxBtnRight:'#paginate_m_right',
+              onPageClicked: function(a,num) {
+                 loadResult(num);
+              }
+            });
                      
       });
 
