@@ -2,7 +2,8 @@
 var map,marker,geocoder;
 var productIndex=0;
 var allProducts = [];
-var currentPage = 1;
+var initPage = 0;
+var currentPage = initPage;
 var newProductvalidator;
 var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.4,top:135,left:300};
 var serverUrl = 'http://googlemaps.mcguy.c9.io';
@@ -110,7 +111,7 @@ function initialize() {
                   +Math.round(location.lng()*100)/100+", lat:"+Math.round(location.lat()*100)/100+")<small>");
              
              //fetchProducts([location.lng(),location.lat()]);
-             loadResults(1);
+             loadResults(initPage);
         }
       } else {
         alert("Geocoder failed due to: " + status);

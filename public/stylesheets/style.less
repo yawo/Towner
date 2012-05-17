@@ -87,3 +87,65 @@ header .header-right *{vertical-align:middle;}
     color:gray;
     cursor:pointer;
     }
+/** Paginator **/    
+#paginate_o_left {
+    cursor:pointer;
+    float:left;
+    //background-color:#f7f9fc;
+    width:22px; height:15px;
+    }
+	#paginate_o_right {        
+    cursor:pointer;
+    //background-color:#f7f9fc;
+    float:left;
+    width:22px; height:15px;
+   	}
+	#paginate_m_left {
+    float:left;
+    //background-color:#f7f9fc;
+    cursor:pointer;
+    width:22px; height:15px;
+   	}
+	#paginate_m_right {
+    cursor:pointer;
+    //background-color:#f7f9fc;
+    float:left;
+    width:22px; height:15px;
+   	}
+	/* must set border width with px */
+	#paginate-results .paginator_p {
+      cursor:pointer;
+	  width:25px;
+		height:18px;
+        font-size:10px;
+		font-weight:bold;
+		color: #007edf;
+		background-color:transparent;
+		border:none;
+		padding:3px 3px 3px 3px;
+	} 
+	#paginate-results .paginator_p_bloc {
+        margin-bottom: 7px;
+	}
+	#paginate-results .paginator_p:hover {
+		color:white;
+		background-color:#25a29e;
+	}
+	#paginate-results .paginator_p.selected {
+		color:white;
+		background-color:#dd5c78;
+	}
+	#paginate-results .paginator_slider {
+		background-color:#f2d21b;
+		left:3px;        
+        height: 3px;
+        top:0px;
+        
+	}
+	#paginate-results .paginator_slider .ui-slider-handle {
+		width: 9px;
+		height: 9px;
+		top: -4px;
+		background-color:#f18fa8;
+		border: solid 1px black ;
+	}

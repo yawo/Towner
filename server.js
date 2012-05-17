@@ -468,11 +468,13 @@ app.post('/deleteproduct',ensureAuthenticated, function(req, res){
       });  
 }); 
 
-app.post('/storelocation', function(req, res){
+app.post('/storelocation/:pageNumber', function(req, res){
   // Perhaps we posted several items with a form
   // (use the bodyParser() middleware for this)  
   req.session.location = req.body.location;  
   var sldocs ={};
+  var resultsPerPage=25;
+  var skipFrom = (req.params.pageNumber) * resultsPerPage;
   var slhandler = (function(scop){
       return function(err, docs){
         if(err){
@@ -494,7 +496,8 @@ app.post('/storelocation', function(req, res){
       filters = {category:req.body.category,$or:or};
   }
   console.log("filters",filters);
-  Product.find(filters).near('location',req.session.location).limit(50).exec(slhandler);
+  //Product.find(filters).near('location',req.session.location).limit(50).exec(slhandler);  
+  Product.find(filters).near('location',req.session.location).skip(skipFrom).limit(resultsPerPage).exec(slhandler);
   
 });
 
@@ -539,6 +542,7 @@ function NotFound(msg){
 }
 
 /************************************** Server functions *************************/
+
 function saveProduct(req,res,photoUrl){
        var data =  {title:req.body.title
           ,category:req.body.category
