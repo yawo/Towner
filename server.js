@@ -26,7 +26,9 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-
+var enums = {
+    scores:{mark:2,like:1,unlike:-1,erronous:-2}
+};
 
 var express = require('express');
 
@@ -421,6 +423,10 @@ app.get('/', function(req, res){
     //res.send("Hello");
 });
 
+app.post('/score', function(req, res){     
+      
+});
+
 
 app.post('/saveproduct',ensureAuthenticated, function(req, res){
     console.log("Save prod");
@@ -554,7 +560,7 @@ function saveProduct(req,res,photoUrl){
           ,isAvailable:req.body.isAvailable
           ,location:[req.body.locationLng,req.body.locationLat]
           ,locationStr:req.body.locationStr
-          }; 
+          };  
           
     if(req.body._id){
         data =  {title:req.body.title
@@ -595,11 +601,27 @@ function saveProduct(req,res,photoUrl){
 /********** Connection à MongoDB ******/
 console.time("MongoDb init");
 var mongoose = require('mongoose');
+var userMongoose = mongoose.createConnection(MONGO_USERS_URL);
 mongoose.connect(MONGO_URL);
 var Schema = mongoose.Schema
   , ObjectId = Schema.ObjectId;
 
-//We need a redis base to compute stats.
+//Schema
+var ScoreSchema = new Schema({
+    userId      : Number,
+    mark        : Number,
+    threeWords  : [String]
+});
+
+var UserSchema  = new Schema({
+    userId      : String,
+    erronous    : Number,
+    likes       : Number,
+    dislikes    : Number,
+    marks       : Number,
+    coef        : Number    
+});
+UserSchema.index({userId:1});
 
 var ProductSchema = new Schema({
     id          : ObjectId
@@ -612,37 +634,23 @@ var ProductSchema = new Schema({
   , offlineDate : Date
   , owner       : String
   , likes       : Number
-  , mark        : Number
-  , erronous    : [String]
+  , dislikes    : Number
+  , marks       : Number
+  , erronous    : Number
+  , likesMap    : [String]
+  , dislikesMap : [String]  
+  , erronousMap : [String]
+  , marksMap    : [ScoreSchema]
   , picture     : String
   , locationStr : String
   , location    : [Number]
 });
-ProductSchema.index({location:"2d",category:1,title:1,description:1,isAvailable:1});
-
-
+ProductSchema.index({location:"2d",marks:1,category:1,title:1,description:1,isAvailable:1});
 var Product = mongoose.model('Product',ProductSchema);
-
-//Insert products : no more used.
-var products = [];
- products[0] = new Product({ 
-    title       : 'P1'
-  , price       : '50'
-  , isAvailable : true
-  , onlineDate  : new Date()
-  , owner       : 'Mohafada'
-  , location    : [10,10]});
-  
-  /*products.forEach(function(prod){
-      prod.save(function(err){
-          if(err){
-            console.log(prod.title,"Error saving:",err);
-          } 
-      });
-  });  */
-  console.timeEnd("MongoDb init");
-  
+var User    = userMongoose.model('User',UserSchema);
  
+
+console.timeEnd("MongoDb init");
 
 function findProductNear(loc){
       var data =  ['title'
@@ -651,7 +659,8 @@ function findProductNear(loc){
           ,'description'
           ,'offlineDate'
           ,'likes'
-          ,'mark'
+          ,'dislikes'
+          ,'marks'
           ,'erronous'
           ,'owner'
           ,'picture'
@@ -660,7 +669,7 @@ function findProductNear(loc){
     var docs={};
     Product.find({},data).where('location').near(loc).exec(getRes);    
     
-    function getRes(err, res){
+ function getRes(err, res){
         if(err){
              console.log("findProductNear Error:",err);
              return '{}';
@@ -671,6 +680,10 @@ function findProductNear(loc){
     }
     return docs;
 }
+/**** User management ***/
+
+
+/****  End User management   ****/
 
 function ensureAuthenticated(req, res, next) {
   console.log("Ensure",req.session.isAuthenticated);
@@ -679,88 +692,4 @@ function ensureAuthenticated(req, res, next) {
 }
 
 
-
 app.listen(appPort);
-
-/*
-Google profile : { displayName: 'kpotufe guillaume',
-  emails: [ { value: 'mcguy2008@gmail.com' } ],
-  name: { familyName: 'guillaume', givenName: 'kpotufe' },
-  identifier: 'https://www.google.com/accounts/o8/id?id=AItOawn5t2c6m-0x_AIQfbWeBd2apahRHGPkGf0' }
-  ------------------------------------------------------
-Facebook profile : { provider: 'facebook',
-  id: '1375851602',
-  username: undefined,
-  displayName: 'Guillaume Kpotufe',
-  name: 
-   { familyName: 'Kpotufe',
-     givenName: 'Guillaume',
-     middleName: undefined },
-  gender: 'male',
-  profileUrl: 'http://www.facebook.com/profile.php?id=1375851602',
-  emails: [ { value: undefined } ],
-  _raw: '{"id":"1375851602","name":"Guillaume Kpotufe","first_name":"Guillaume","last_name":"Kpotufe","link":"http:\\/\\/www.facebook.com\\/profile.php?id=1375851602","bio":"William Lovewin, the man and the artist.","quotes":"Carpe Diem","education":[{"school":{"id":"112000482160088","name":"Coll\\u00e8ge Protestant Lom\\u00e9 Tokoin 1999-2003"},"type":"High School","with":[{"id":"1167797350","name":"Ekpe Hoassi"}]},{"school":{"id":"102211456488002","name":"College Protestant de Lome"},"type":"High School","with":[{"id":"1328064539","name":"Spero Adzessi"}]},{"school":{"id":"115212441823617","name":"ENSIAS"},"type":"College"}],"gender":"male","timezone":1,"locale":"fr_FR","verified":true,"updated_time":"2012-04-29T20:21:07+0000"}',
-  _json: 
-   { id: '1375851602',
-     name: 'Guillaume Kpotufe',
-     first_name: 'Guillaume',
-     last_name: 'Kpotufe',
-     link: 'http://www.facebook.com/profile.php?id=1375851602',
-     bio: 'William Lovewin, the man and the artist.',
-     quotes: 'Carpe Diem',
-     education: [ [Object], [Object], [Object] ],
-     gender: 'male',
-     timezone: 1,
-     locale: 'fr_FR',
-     verified: true,
-     updated_time: '2012-04-29T20:21:07+0000' } }
-  ------------------------------------------------------
-Twitter profile : { provider: 'twitter',
-  id: 301400761,
-  username: 'Wlovewin',
-  displayName: 'Kpotufe Guillaume ',
-  _raw: '{"id":301400761,"id_str":"301400761","name":"Kpotufe Guillaume ","screen_name":"Wlovewin","location":"","description":"","url":null,"protected":false,"followers_count":2,"friends_count":3,"listed_count":0,"created_at":"Thu May 19 12:10:12 +0000 2011","favourites_count":0,"utc_offset":null,"time_zone":null,"geo_enabled":false,"verified":false,"statuses_count":0,"lang":"fr","contributors_enabled":false,"is_translator":false,"profile_background_color":"C0DEED","profile_background_image_url":"http:\\/\\/a0.twimg.com\\/images\\/themes\\/theme1\\/bg.png","profile_background_image_url_https":"https:\\/\\/si0.twimg.com\\/images\\/themes\\/theme1\\/bg.png","profile_background_tile":false,"profile_image_url":"http:\\/\\/a0.twimg.com\\/sticky\\/default_profile_images\\/default_profile_4_normal.png","profile_image_url_https":"https:\\/\\/si0.twimg.com\\/sticky\\/default_profile_images\\/default_profile_4_normal.png","profile_link_color":"0084B4","profile_sidebar_border_color":"C0DEED","profile_sidebar_fill_color":"DDEEF6","profile_text_color":"333333","profile_use_background_image":true,"show_all_inline_media":false,"default_profile":true,"default_profile_image":true,"following":false,"follow_request_sent":false,"notifications":false}',
-  _json: 
-   { id: 301400761,
-     id_str: '301400761',
-     name: 'Kpotufe Guillaume ',
-     screen_name: 'Wlovewin',
-     location: '',
-     description: '',
-     url: null,
-     protected: false,
-     followers_count: 2,
-     friends_count: 3,
-     listed_count: 0,
-     created_at: 'Thu May 19 12:10:12 +0000 2011',
-     favourites_count: 0,
-     utc_offset: null,
-     time_zone: null,
-     geo_enabled: false,
-     verified: false,
-     statuses_count: 0,
-     lang: 'fr',
-     contributors_enabled: false,
-     is_translator: false,
-     profile_background_color: 'C0DEED',
-     profile_background_image_url: 'http://a0.twimg.com/images/themes/theme1/bg.png',
-     profile_background_image_url_https: 'https://si0.twimg.com/images/themes/theme1/bg.png',
-     profile_background_tile: false,
-     profile_image_url: 'http://a0.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
-     profile_image_url_https: 'https://si0.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
-     profile_link_color: '0084B4',
-     profile_sidebar_border_color: 'C0DEED',
-     profile_sidebar_fill_color: 'DDEEF6',
-     profile_text_color: '333333',
-     profile_use_background_image: true,
-     show_all_inline_media: false,
-     default_profile: true,
-     default_profile_image: true,
-     following: false,
-     follow_request_sent: false,
-     notifications: false } }
-
-
-
-*/
-
