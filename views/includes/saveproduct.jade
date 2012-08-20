@@ -1,8 +1,8 @@
 #dialog-form(title='Create new product').ui-corner-all
       .dialog-invite 
-        //span.closer.ui-icon.ui-icon-closethick.inline-action(title='close',onclick='$.colorbox.close()') x &nbsp; &nbsp; &nbsp; &nbsp;
-        b Please fill the element's informations.
-        
+        span.closer.ui-corner-all.ui-icon.ui-icon-closethick.inline-action(title='close',onclick='$.colorbox.close()') x &nbsp; &nbsp; &nbsp; &nbsp;
+        div Please fill the element's informations.
+        hr
       form.form-content(method="post",enctype="multipart/form-data", action="saveproduct",id="newproductform")
         table
           - each field in productFields

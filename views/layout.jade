@@ -9,6 +9,7 @@ html
     // link(href='http://fonts.googleapis.com/css?family=Oswald', rel='stylesheet', type='text/css')
     script(type='text/javascript', src='http://maps.googleapis.com/maps/api/js?key=AIzaSyCgW7lk0fz_YE5gZj_loz24rrnEECXSHqE&sensor=false')            
     script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='/javascripts/common.js') 
     script(type='text/javascript', src='/javascripts/script.js')    
     
   body
@@ -54,6 +55,9 @@ html
       $(function() {    
          
           $( ".button" ).button(); 
+          $('body').click( function(e) {
+            
+          });
           $('body').keyup(function(e){
                 if(e.which == 27){
                   $(".product-details").remove(); 

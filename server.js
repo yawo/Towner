@@ -423,8 +423,86 @@ app.get('/', function(req, res){
     //res.send("Hello");
 });
 
+app.get('/session',function(req,ses){
+    console.log("session:",req.session);
+});
+
+function fetchMongoUser(req){
+    //find mongoUser 
+    var mongoUser = req.session.mongoUser;
+    if(mongoUser) return;
+    //else find in mongoDB
+    console.log("searching in mongoDB ");
+    var data = {};
+    User.find().where('userId',req.session.user.id).exec(function(err,res){
+        if(err){
+            console.log("getUser error: ",err);            
+        }else{
+            if(res){
+                req.session.mongoUser=res;
+                console.log("1. saving to session ",req.session.mongoUser);
+            }else{ 
+                mongoUser = new User({userId:req.session.user.id, erronous:0, likes:0, dislikes:0, marks:0, coef:1});
+                mongoUser.save(function(err2){
+                    if(err2){
+                        console.log("mongoUser save Error: ",err2);
+                    }else{
+                        req.session.mongoUser=mongoUser;     
+                        console.log("2. saving to session ",req.session.mongoUser);
+                    }
+                });                
+            }
+        }
+    }); 
+}
+
+
 app.post('/score', function(req, res){     
-      
+    //find in session
+      //find mongoUser 
+    var mongoUser = req.session.mongoUser;
+    if(mongoUser) res.json({user:mongoUser});;
+    //else find in mongoDB
+    console.log("searching in mongoDB ");
+    var data = {};
+    User.find().where('userId',req.session.user.id).exec(function(err,res){
+        if(err){
+            console.log("getUser error: ",err); 
+            res.json({user:""});
+        }else{
+            if(res){
+                req.session.mongoUser=res;
+                console.log("1. saving to session ",req.session.mongoUser);
+                var mongoUser = req.session.mongoUser;    
+                res.json({user:mongoUser});
+            }else{ 
+                mongoUser = new User({userId:req.session.user.id, erronous:0, likes:0, dislikes:0, marks:0, coef:1});
+                mongoUser.save(function(err2){
+                    if(err2){
+                        console.log("mongoUser save Error: ",err2);
+                        res.json({user:""});
+                    }else{
+                        req.session.mongoUser=mongoUser;     
+                        console.log("2. saving to session ",req.session.mongoUser);
+                        res.json({user:mongoUser});
+                    }
+                });                
+            }
+        }
+    });
+    
+    /*console.log("Fetched mongoUser: ",mongoUser);
+    //score it
+    switch(req.body.scoretype){
+        case enums.scores.mark:
+             break;
+        case enums.scores.like:
+             break;
+        case enums.scores.unlike:
+             break;
+        case enums.scores.erronous:
+             break;    
+    }*/
 });
 
 
@@ -644,6 +722,7 @@ var ProductSchema = new Schema({
   , picture     : String
   , locationStr : String
   , location    : [Number]
+  , locked      : Boolean
 });
 ProductSchema.index({location:"2d",marks:1,category:1,title:1,description:1,isAvailable:1});
 var Product = mongoose.model('Product',ProductSchema);

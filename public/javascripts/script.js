@@ -5,15 +5,16 @@ var allProducts = [];
 var initPage = 0;
 var currentPage = initPage;
 var newProductvalidator;
-var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.4,top:135,left:300};
+var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.8,top:135,left:300};
 var serverUrl = 'http://googlemaps.mcguy.c9.io';
 //This is the compilation of partials/product.jade template
-var productDetailsTemplate = '<div class="product-details ui-corner-all"><b id="product-details-title"></b>(<small>press <b>Esc</b> to close</small>)<br/><div id="product-details-description"></div></div>';
+var productDetailsTemplate = '<div class="product-details ui-corner-all"> <span id="product-details-_id" class="ui-helper-hidden"> </span><table><tr class="details-head"><td><b id="product-details-title"> </b><span id="product-details-actions"><input name="details-mark" id="details-mark" placeholder="0" size="1" class="input details-mark ui-widget ui-corner-all"/><span id="mark-action" title="How much will you mark it on 20 points?" onclick="productScore(2,0,0)"></span><span id="like-action" title="Did you like it  ?" onclick="productScore(1,0,0)"> </span><span id="unlike-action" title="Something hurts about it ?" onclick="productScore(-1,0,0)"> </span><span id="signal-action" title="Is this erronous or Bad ?" onclick="productScore(-2,0,0)"> </span><span id="close-action" title="close" onclick="productDetailsClear()"> </span></span></td></tr><tr>     <td colspan="2" class="details-description"><div id="product-details-description"></div></td></tr></table></div>';
 var zoom=5;
 var isAuthenticated=false;
 var enums = {
     scores:{mark:2,like:1,unlike:-1,erronous:-2}
 };
+
 function setAuthenticated(auth){
     isAuthenticated=auth;    
     console.log("auth?",auth);
@@ -111,7 +112,7 @@ function initialize() {
                   +Math.round(location.lng()*100)/100+", lat:"+Math.round(location.lat()*100)/100+")<small>");
              
              //fetchProducts([location.lng(),location.lat()]);
-             loadResults(initPage);
+             loadResults(-1);
         }
       } else {
         alert("Geocoder failed due to: " + status);
@@ -137,7 +138,7 @@ function initialize() {
         var content="<table width='100%'>";
         for(var i=0;i<productsList.length;i++){             
              content+="<tr class='product-item'  onmouseoutNO='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+productsList[i]._id+"'>";
-             content+="<td width='85%' onclick='productDetails("+i+")'><b>"+productsList[i].title+"</td>";             
+             content+="<td width='90%' onclick='productDetails("+i+")'><b>"+productsList[i].title+"</td>";             
              content+="</td><td> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
              content+=" <i class='action-remove' title='Delete the product' onclick='productRemove("+i+")'/> ";
              content+="</td></tr>";
@@ -154,7 +155,7 @@ function initialize() {
 
  function productRemove(i){
      if(!isAuthenticated){
-         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         $.colorbox({html:"<div id='connectBefore' style='color:white'>Please <b>Login</b> (<small>at the top right</small>) before.</div>"});
          console.log("Not Auth");
          return;
      }
@@ -168,7 +169,7 @@ function initialize() {
  
  function productEdit(i){     
      if(!isAuthenticated){
-         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         $.colorbox({html:"<div id='connectBefore' style='color:white'>Please <b>Login</b> (<small>at the top right</small>) before.</div>"});
          return;
      }
     //Fill all values    
@@ -188,18 +189,25 @@ function initialize() {
     for(var field in allProducts[currentPage][i]){
         $("#product-details-"+field).html(allProducts[currentPage][i][field] || 'n/a');           
     }    
+    $( "#mark-action" ).button({text: false,icons: {primary: "ui-icon-pencil"}});
+    $( "#like-action" ).button({text: false,icons: {primary: "ui-icon-circle-arrow-n"}});
+    $( "#unlike-action" ).button({text: false,icons: {primary: "ui-icon-circle-arrow-s"}});
+    $( "#signal-action" ).button({text: false,icons: {primary: "ui-icon-cancel"}});
+    $( "#close-action" ).button({text: false,icons: {primary: "ui-icon-close"}});
+    
  } 
  
  
- function productDetailsClear(i){     
+ function productDetailsClear(i){
+     var i=i||1;
      $("#"+allProducts[currentPage][i]._id).removeClass('ui-state-hover');
     $(".product-details").remove();
  }
  
- function productScore(type,val){     
+ function productScore(type,val,i){     
      //type: -1=dislike, -2=erronous, 1=like,2=mark 
      if(!isAuthenticated){
-         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         $.colorbox({html:"<div id='connectBefore' style='color:white'>Please <b>Login</b> (<small>at the top right</small>) before.</div>"});
          return;
      }else{         
          switch(type){
@@ -212,12 +220,15 @@ function initialize() {
             case enums.scores.erronous:
                  break;     
          }
+          $.post('/score',{scoretype:type,val:val,id:allProducts[currentPage][i]._id} , function(data, textStatus, jqXHR){
+            console.log("Data",data,textStatus);                 
+         });
     }
  }
  
  function newProductInit() {        
         newProductvalidator = $("#newproductform").validate();         
-        $( ".dlt-datepicker" ).datepicker();
+        //$( ".dlt-datepicker" ).datepicker();
         $("#new-product-submit").button().click(function(){
             
             if(newProductvalidator.form()){                
@@ -235,7 +246,7 @@ function initialize() {
  
  function createProductAt(loc){
     if(!isAuthenticated){
-         $.colorbox({html:"Please <b>Login</b> (<small>at the top right</small>) before."});
+         $.colorbox({html:"<div id='connectBefore' style='color:white'>Please <b>Login</b> (<small>at the top right</small>) before.</div>"});
          return;
      } 
     var loc = loc || marker.getPosition();
@@ -254,8 +265,15 @@ function initialize() {
  }
  
  function loadResults(pageNum){
-     currentPage = pageNum;
+     currentPage = pageNum || initPage;  
+     console.log("currentPage",currentPage);
+     if(currentPage==-1){
+         //Reset search
+         currentPage = initPage;
+         allProducts[currentPage]=null;
+     }
      if(!(allProducts[currentPage])){
+         
          var loc =  [marker.getPosition().lng(),marker.getPosition().lat()]
          ,category = $('#category-filter').val(), keywords = $('#content-filter').val();
          var url = '/storelocation/'+currentPage,reg = new RegExp("[ ,;\+]+", "g");
@@ -280,12 +298,12 @@ function initialize() {
     
     var channel1 = io.connect(serverUrl+'/channel1?token=aXoqIwP');
     channel1.on('news', function (data) {
-        console.log(data);
-        channel1.emit('my other event', { my: 'data' });
+        //console.log(data);
+        //channel1.emit('my other event', { my: 'data' });
     });
     
     var channel2 = io.connect(serverUrl+'/channel2?token=aXoqIwP');
     channel2.on('news', function (data) {
-        console.log(data);
-        channel2.emit('my other event', { my: 'data' });
+        //console.log(data);
+        //channel2.emit('my other event', { my: 'data' });
     });

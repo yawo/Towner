@@ -21,7 +21,7 @@ block content
             b &nbsp; related to :  
             input.input.special-form.ui-widget.ui-corner-all(name='content-filter',id='content-filter',placeholder='type some keywords',size="50")        
             |  &nbsp;&nbsp;
-            span#submit-filter(title='Search near current position',onclick='fetchProducts()') &nbsp; 
+            span#submit-filter(title='Search near current position',onclick='loadResults(-1)')
         #map_canvas              
         .result.blockheader.ui-corner-bottom 
       td.ui-corner-bottom

@@ -1,11 +1,19 @@
- @base: #f938ab;
+//@import url(http://fonts.googleapis.com/css?family=Averia+Serif+Libre);
+//@import url(http://fonts.googleapis.com/css?family=Didact+Gothic);
+@import url(http://fonts.googleapis.com/css?family=Cutive);
+@font-face {
+  font-family: 'Foglihten';
+  src: url('fonts/FoglihtenNo04-070.otf');
+}
+
+@base: #f938ab;
 
 .box-shadow(@style, @c) when (iscolor(@c)) {
   box-shadow:         @style @c;
   -webkit-box-shadow: @style @c;
   -moz-box-shadow:    @style @c;
 }
-.box-shadow(@style, @alpha: 50%) when (isnumber(@alpha)) {
+.box-shadow(@style, @alpha: 80%) when (isnumber(@alpha)) {
   .box-shadow(@style, rgba(0, 0, 0, @alpha));
 }
 .box {   
@@ -17,11 +25,11 @@
 }
 
 .fonts{
-    font-family:verdana, 'Cantarell', serif;
+    font-family:'Cutive',verdana, 'Cantarell', serif;
 }
 
 html { height: 100% }
-body { font-size:12px;height: 100%; margin: 0; padding: 0 ;.fonts;}
+body { font-size:10px;height: 100%;font-weight:100; margin: 0; padding: 0 ;.fonts;}
 #block-content{margin-right:auto;margin-left:auto;}
 header { background-color:#252526;color:white; width:100%;.border-bottom-clr;}
 header .header-left{width:75%;
@@ -45,8 +53,9 @@ header .header-right *{vertical-align:middle;}
     position: relative;
     left: 0px;
     //top: 35px;
+    top: -4px;
     background: black;
-    opacity:0.85;
+    opacity:0.75;
     z-index:10;
     border-top:0px solid #222222;
 }
@@ -60,15 +69,25 @@ header .header-right *{vertical-align:middle;}
     border:5px,solid,#777777;
 }
  
-.transparency { color: white; background-color: black; opacity: 0.85; z-index: 1000; border: 2px solid black; }
-.form-content { padding: 5px; width: 410px; height: 380px; overflow: none; color: white; background-color: black; 
-    opacity: 0.85; z-index: 1000; border: 2px solid black; } 
-.form-content label { font-weight: bold; } 
-.form-content input, .form-content textarea, .form-content select, .form-content select option { color: white; 
-    background-color: black; opacity: 0.85; z-index: 1000; border: 2px solid black; } 
-#dialog-form { color: white; border: 2px solid black; } 
-#dialog-form .dialog-invite { text-align: center; border-bottom: 1px solid #041524; background-color: black; padding: 5px; }
-.invite { padding: 3px; font-size: 20px; letter-spacing: 1px; color: #ffffff; font-weight: bold; } 
+.transparency { color: white; background-color: black; opacity: 0.1; z-index: 1000; border: 2px solid white; }
+.form-content { padding: 5px; width: 410px; height: 360px; overflow: none; color: white;  
+    z-index: 1000; } 
+.form-content label { } 
+.form-content input, .form-content textarea, .form-content select, .form-content select option { color: black; 
+    z-index: 1000; border: 2px solid rgba(68, 68, 68, 0) } 
+#dialog-form { color: white; border:12px solid rgba(255, 255, 255, 0.31);
+  hr {border-color: #444;} 
+}
+#dialog-form .dialog-invite { text-align: center;  padding: 0px; 
+    div{
+        background-color: rgba(255, 255, 255, 0.31);padding-bottom: 5px;
+    }
+    .closer{
+        float:right;
+        background-color:rgba(255, 255, 255, 0.4);
+    }
+}
+.invite { padding: 3px; font-size: 20px; letter-spacing: 1px; color: black; font-weight: bold;font-family:'Foglihten' } 
 .blockheader { background-color: black; color: white; border: 2px; padding: 5px; } 
 .product-details { background-color: black; color: white; border: 2px; padding: 5px; opacity: 0.8;
     position: absolute; top: 135px; left: 105px; z-index: 22; 
@@ -117,7 +136,7 @@ header .header-right *{vertical-align:middle;}
       cursor:pointer;
 	  width:25px;
 		height:18px;
-        font-size:10px;
+        font-size:8px;
 		font-weight:bold;
 		color: #007edf;
 		background-color:transparent;
@@ -149,3 +168,14 @@ header .header-right *{vertical-align:middle;}
 		background-color:#f18fa8;
 		border: solid 1px black ;
 	}
+.ui-button-icon-only {
+    width:1.2em;
+    height:1.2em;
+}
+.details-mark{
+    font-size:9px;
+}
+
+#product-details-actions{
+    margin-left:3px;
+}
