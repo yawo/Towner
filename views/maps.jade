@@ -3,18 +3,18 @@ extends layout
 block content 
   table#towner-main    
     tr
-      td
+      td(width='702px')
         #actions.blockheader.ui-corner-top
           center
             span.action  Click: 
-            small: i Find an element near current position.
+            small  Find an element near current position.
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
-            small: i Create an element at current position.&nbsp;&nbsp;
+            small  Create an element at current position.&nbsp;&nbsp;
             span#quick-create-product(title='Create near current position',onclick='createProductAt()') 
         #map-filters.blockheader.ui-corner-top
           small 
             b  Find :  
-            select.select.special-form.ui-widget.ui-corner-all(name='category-filter',id='category-filter',value=productFields[0][2])
+            select.sparkbox-custom.select.special-form.ui-widget.ui-corner-all(name='category-filter',id='category-filter',value=productFields[0][2])
               each opt in productFields[0][3]
                  - isSelected = (opt==productFields[0][2])
                  option(value=opt,selected=isSelected)= opt
@@ -28,9 +28,9 @@ block content
         #results-header.blockheader.ui-corner-top
           center
             span.action  Click: 
-            small: i Show element details.
+            small  Show element details.
             span.action  &nbsp;&nbsp;|&nbsp;&nbsp;  Double-click: 
-            small: i Edit the element.
+            small  Edit the element.
         p.product-result 
         #paginate-results.blockheader.ui-corner-bottom
               // optional left control buttons 
@@ -63,6 +63,7 @@ block content
                  loadResults(num);
               }
             });
+            $('.sparkbox-custom').sbCustomSelect();
                      
       });
 

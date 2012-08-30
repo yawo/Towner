@@ -8,7 +8,7 @@ var newProductvalidator;
 var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.8,top:135,left:300};
 var serverUrl = 'http://googlemaps.mcguy.c9.io';
 //This is the compilation of partials/product.jade template
-var productDetailsTemplate = '<div class="product-details ui-corner-all"> <span id="product-details-_id" class="ui-helper-hidden"> </span><table><tr class="details-head"><td><b id="product-details-title"> </b><span id="product-details-actions"><input name="details-mark" id="details-mark" placeholder="0" size="1" class="input details-mark ui-widget ui-corner-all"/><span id="mark-action" title="How much will you mark it on 20 points?" onclick="productScore(2,0,0)"></span><span id="like-action" title="Did you like it  ?" onclick="productScore(1,0,0)"> </span><span id="unlike-action" title="Something hurts about it ?" onclick="productScore(-1,0,0)"> </span><span id="signal-action" title="Is this erronous or Bad ?" onclick="productScore(-2,0,0)"> </span><span id="close-action" title="close" onclick="productDetailsClear()"> </span></span></td></tr><tr>     <td colspan="2" class="details-description"><div id="product-details-description"></div></td></tr></table></div>';
+var productDetailsTemplate = '<div class="product-details ui-corner-all ui-helper-hidden"> <span id="product-details-_id" class="ui-helper-hidden"> </span><table><tr class="details-head"><td><b id="product-details-title"> </b><span id="product-details-actions"><input name="details-mark" id="details-mark" placeholder="0" size="1" class="input details-mark ui-widget ui-corner-all"/><span id="mark-action" title="How much will you mark it on 20 points?" onclick="productScore(2,0,0)"></span><span id="like-action" title="Did you like it  ?" onclick="productScore(1,0,0)"> </span><span id="unlike-action" title="Something hurts about it ?" onclick="productScore(-1,0,0)"> </span><span id="signal-action" title="Is this erronous or Bad ?" onclick="productScore(-2,0,0)"> </span><span id="close-action" title="close" onclick="productDetailsClear()"> </span></span></td></tr><tr>     <td colspan="2" class="details-description"><div id="product-details-description"></div></td></tr></table></div>';
 var zoom=5;
 var isAuthenticated=false;
 var enums = {
@@ -108,7 +108,7 @@ function initialize() {
         if (results[1]) { 
           //map.setZoom(zoom)
           //$(".result").html("Your click position is (Lat/Long) : <b>"+location.lat()+" / "+location.lng()+".</b> ("+results[1].formatted_address+")");
-          $(".result").html("<small>Near  » <b>"+results[1].formatted_address+".</b> (lng:"
+          $(".result").html("<small>Near  » "+results[1].formatted_address+". (lng:"
                   +Math.round(location.lng()*100)/100+", lat:"+Math.round(location.lat()*100)/100+")<small>");
              
              //fetchProducts([location.lng(),location.lat()]);
@@ -135,11 +135,11 @@ function initialize() {
  
  function buildProductsUi(productsList){
       $(".product-result").html("");    
-        var content="<table width='100%'>";
+        var content="<table cellspacing='0' width='100%'>";
         for(var i=0;i<productsList.length;i++){             
              content+="<tr class='product-item'  onmouseoutNO='productDetailsClear("+i+")' ondblclick='productEdit("+i+")' id='"+productsList[i]._id+"'>";
-             content+="<td width='90%' onclick='productDetails("+i+")'><b>"+productsList[i].title+"</td>";             
-             content+="</td><td> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
+             content+="<td width='90%' onclick='productDetails("+i+")'><b>"+productsList[i].title+"</b><hr style='border-color: rgba(217, 217, 221, 0.55);'/></td>";             
+             content+="</td><td class='td-action'> <i class='action-edit' title='Edit the product'    onclick='productEdit("+i+")'/> ";             
              content+=" <i class='action-remove' title='Delete the product' onclick='productRemove("+i+")'/> ";
              content+="</td></tr>";
         }
@@ -194,13 +194,18 @@ function initialize() {
     $( "#unlike-action" ).button({text: false,icons: {primary: "ui-icon-circle-arrow-s"}});
     $( "#signal-action" ).button({text: false,icons: {primary: "ui-icon-cancel"}});
     $( "#close-action" ).button({text: false,icons: {primary: "ui-icon-close"}});
+    $(".product-details").fadeIn(3000,'easeOutExpo',function(){});
+    $(".product-details").mouseleave(function(){
+        $(".product-details").fadeOut(2000);
+    });
     
  } 
  
  
  function productDetailsClear(i){
-     var i=i||1;
-     $("#"+allProducts[currentPage][i]._id).removeClass('ui-state-hover');
+    var i=i||1;
+    $("#"+allProducts[currentPage][i]._id).removeClass('ui-state-hover');
+    $(".product-details").fadeOut(2000);
     $(".product-details").remove();
  }
  

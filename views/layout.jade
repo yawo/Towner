@@ -18,7 +18,7 @@ html
         tr
           td.header-left
             .invite Towner
-            small.motto: i &nbsp; Simplifying our Lifes ...
+            small.motto &nbsp; Simplifying our Lifes ...
           td.header-right 
             span#header-username: b #{userName} &nbsp;   
             if isAuthenticated              
@@ -29,8 +29,8 @@ html
               a#logout-button.button(href='/logout') Logout
             else
               small
-                 i  | Login using : 
-              each provider in ['google', 'facebook','twitter']
+                | \| Login using : 
+              each provider in ['facebook','google', 'twitter']
                  | &nbsp;
                  a(href='/auth/'+provider)
                    img(src='http://github.com/intridea/authbuttons/raw/master/png/'+provider+'_32.png')
@@ -47,6 +47,7 @@ html
     script(type='text/javascript', src='/javascripts/jPaginator-min.js')        
     script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    
     script(type='text/javascript', src='/javascripts/jquery.colorbox.js')    
+    script(type='text/javascript', src='/javascripts/jquery.sparkbox-select.js')        
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js')
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/additional-methods.min.js')
     // script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/localization/messages_fr.js')     
@@ -64,6 +65,7 @@ html
                   console.log("Esc");
                 }
           });
+          
       });
     
         /*
