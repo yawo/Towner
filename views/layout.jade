@@ -17,7 +17,11 @@ html
       table(width="100%") 
         tr
           td.header-left
-            .invite Towner
+            .invite 
+                span.kleevo Kleevoo
+                small
+                   sup &copy;
+                span.towner Towner
             small.motto &nbsp; Simplifying our Lifes ...
           td.header-right 
             span#header-username: b #{userName} &nbsp;   
@@ -39,10 +43,28 @@ html
     br
     center#block-content
       block content
-    center
-      .footer &copy; Guillaume Kpotufe , 
-        b Towner labs 
+    center#block-footer
+      .footer &copy; Towner Labs, 
+        b Kleevoo  
         | (townerlabs@gmail.com), 2012.
+      hr
+      table.footerparts
+        tr
+          th.ui-corner-all How to use Towner ?
+          th.ui-corner-all What is Kleevoo ?
+          th.ui-corner-all Legal Mentions
+          th.ui-corner-all About us
+        tr
+          td Find an info
+          td Customer satisfaction
+          td Conditions of use
+          td Kleevo Team
+        tr
+          td Create, Edit, and Rate an info.
+          td Kleevoo API
+          td Towner responsabilities
+          td Business contact
+          
     script(type='text/javascript', src='/javascripts/jquery.ui.js')    
     script(type='text/javascript', src='/javascripts/jPaginator-min.js')        
     script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    

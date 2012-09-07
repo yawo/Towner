@@ -14,7 +14,7 @@
                  label(for=fname)= fname
                td
                  if ftype == "select"                      
-                   select.select.required.ui-widget-content.ui-corner-all(name=fname,id=fname)
+                   select.sparkbox-custom.select.required.ui-widget-content.ui-corner-all(name=fname,id=fname)
                      each opt in field[3]
                        - isSelected = (opt==field[2])
                        option(value=opt,selected=isSelected)= opt

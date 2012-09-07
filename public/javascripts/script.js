@@ -8,7 +8,7 @@ var newProductvalidator;
 var colorBoxOptions = {inline:true,href:"#dialog-form",opacity:0.8,top:135,left:300};
 var serverUrl = 'http://googlemaps.mcguy.c9.io';
 //This is the compilation of partials/product.jade template
-var productDetailsTemplate = '<div class="product-details ui-corner-all ui-helper-hidden"> <span id="product-details-_id" class="ui-helper-hidden"> </span><table><tr class="details-head"><td><b id="product-details-title"> </b><span id="product-details-actions"><input name="details-mark" id="details-mark" placeholder="0" size="1" class="input details-mark ui-widget ui-corner-all"/><span id="mark-action" title="How much will you mark it on 20 points?" onclick="productScore(2,0,0)"></span><span id="like-action" title="Did you like it  ?" onclick="productScore(1,0,0)"> </span><span id="unlike-action" title="Something hurts about it ?" onclick="productScore(-1,0,0)"> </span><span id="signal-action" title="Is this erronous or Bad ?" onclick="productScore(-2,0,0)"> </span><span id="close-action" title="close" onclick="productDetailsClear()"> </span></span></td></tr><tr>     <td colspan="2" class="details-description"><div id="product-details-description"></div></td></tr></table></div>';
+var productDetailsTemplate = '<div class="product-details ui-corner-all "><span id="product-details-_id" class="ui-helper-hidden">7</span><table><tr class="details-head"><td><b id="product-details-title">Title</b></td><td id="product-details-actions"><input name="details-mark" id="details-mark" placeholder="0" size="1" class="input details-mark ui-widget ui-corner-all" /><span id="mark-action" title="How much will you mark it on 20 points?" onclick="productScore(2,0,0)"></span><span id="like-action" title="Did you like it ?" onclick="productScore(1,0,0)"></span><span id="unlike-action" title="Something hurts about it ?" onclick="productScore(-1,0,0)"></span><span id="signal-action" title="Is this erronous or Bad ?" onclick="productScore(-2,0,0)"></span><span id="close-action" title="close" onclick="productDetailsClear()"></span></td></tr><tr><td colspan="2" class="details-description"><div id="product-details-description"></div></td></tr></table></div>';
 var zoom=5;
 var isAuthenticated=false;
 var enums = {
@@ -195,6 +195,8 @@ function initialize() {
     $( "#signal-action" ).button({text: false,icons: {primary: "ui-icon-cancel"}});
     $( "#close-action" ).button({text: false,icons: {primary: "ui-icon-close"}});
     $(".product-details").fadeIn(3000,'easeOutExpo',function(){});
+    $(".product-details").css('top',$('#map_canvas').position().top+40);
+    $(".product-details").css('left',$('#map_canvas').position().left+80);
     $(".product-details").mouseleave(function(){
         $(".product-details").fadeOut(2000);
     });
