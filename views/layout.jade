@@ -55,15 +55,15 @@ html
           th.ui-corner-all Legal Mentions
           th.ui-corner-all About us
         tr
-          td#find-info(title='ToolTip') Find an info
-          td#cust-sat(title='ToolTip') Customer satisfaction
-          td#cond-use(title='ToolTip') Conditions of use
-          td#kleevo-team(title='ToolTip') Kleevo Team
+          td#find-info(title='First you choose a <b>Category</b> Then you optionally type a search key, and you click on the map to find Infos near the location') Find an info
+          td#cust-sat(title='Kleevoo bring you Customer Satisfaction.<br/> You like, unlike,signal or give mark to an information...') Customer satisfaction
+          td#cond-use(title='Conditions of use') Conditions of use
+          td#kleevo-team(title='Guillaume Kpotufe, Eli Kudzi') Kleevo Team
         tr
-          td#create-edit-help(title='ToolTip') Create, Edit, and Rate an info.
-          td#kleevo-api(title='ToolTip') Kleevoo API
-          td#towner-respons(title='ToolTip') Towner responsabilities
-          td#b-contact(title='ToolTip') Business contact      
+          td#create-edit-help(title='Double click on a location to create info there.<br/>On the right list, you can edit infos<br/>Click on an item on the right list to like, unlike, signal or mark it.') Create, Edit, and Rate an info.
+          td#kleevo-api(title='The Kleevoo API help you embed Kleevoo algorithm on your application and get Customer Satisfaction informations') Kleevoo API
+          td#towner-respons(title='The infos here are from users and managed by them. No responsabilities for Towner.') Towner responsabilities
+          td#b-contact(title='Eli Kudzi, kudelik@gmail.com; Guillaume Kpotufe mcguy2008@gmail.com') Contact      
     script(type='text/javascript', src='/javascripts/jquery.ui.js')    
     script(type='text/javascript', src='/javascripts/jPaginator-min.js')        
     script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    
@@ -90,7 +90,7 @@ html
                   console.log("Esc");
                 }
           });
-          $("table.footerparts td").tipTip();
+          $("table.footerparts td,span").tipTip({maxWidth:'500px'});
           
       });
     

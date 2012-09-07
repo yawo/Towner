@@ -200,7 +200,7 @@ function initialize() {
     $(".product-details").mouseleave(function(){
         $(".product-details").fadeOut(2000);
     });
-    
+    $(".product-details span").tipTip();
  } 
  
  
