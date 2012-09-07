@@ -55,25 +55,28 @@ html
           th.ui-corner-all Legal Mentions
           th.ui-corner-all About us
         tr
-          td Find an info
-          td Customer satisfaction
-          td Conditions of use
-          td Kleevo Team
+          td#find-info(title='ToolTip') Find an info
+          td#cust-sat(title='ToolTip') Customer satisfaction
+          td#cond-use(title='ToolTip') Conditions of use
+          td#kleevo-team(title='ToolTip') Kleevo Team
         tr
-          td Create, Edit, and Rate an info.
-          td Kleevoo API
-          td Towner responsabilities
-          td Business contact
-          
+          td#create-edit-help(title='ToolTip') Create, Edit, and Rate an info.
+          td#kleevo-api(title='ToolTip') Kleevoo API
+          td#towner-respons(title='ToolTip') Towner responsabilities
+          td#b-contact(title='ToolTip') Business contact      
     script(type='text/javascript', src='/javascripts/jquery.ui.js')    
     script(type='text/javascript', src='/javascripts/jPaginator-min.js')        
     script(type='text/javascript', src='http://malsup.github.com/jquery.form.js')    
     script(type='text/javascript', src='/javascripts/jquery.colorbox.js')    
-    script(type='text/javascript', src='/javascripts/jquery.sparkbox-select.js')        
+    script(type='text/javascript', src='/javascripts/jquery.sparkbox-select.js')
+    script(type='text/javascript', src='/javascripts/jquery.tipTip.minified.js')       
+    jquery.tipTip.minified
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js')
     script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/additional-methods.min.js')
     // script(type='text/javascript', src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/localization/messages_fr.js')     
     link(rel='stylesheet', href='/stylesheets/colorbox.css', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/tipTip.css', type='text/css')
+    
     script      
       $(function() {    
          
@@ -87,6 +90,7 @@ html
                   console.log("Esc");
                 }
           });
+          $("table.footerparts td").tipTip();
           
       });
     
